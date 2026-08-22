@@ -36,6 +36,7 @@
 
     <!-- NAVBAR -->
     <header class="bg-blue-900 shadow-lg sticky top-0 z-40">
+        <div id="avisoOffline" class="hidden bg-amber-500 text-blue-950 text-center text-[11px] font-bold py-1.5"><i class="fa-solid fa-wifi"></i> Sem ligação — a mostrar os últimos dados guardados. As alterações vão sincronizar quando a internet voltar.</div>
         <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3 cursor-pointer" onclick="abrirModalAdmin()">
                 <div id="headerLogoBox" class="w-10 h-10 bg-white rounded-lg flex items-center justify-center font-black text-xl text-blue-900 overflow-hidden">H</div>
@@ -44,26 +45,68 @@
                     <p class="text-[10px] text-emerald-400 uppercase tracking-widest font-bold">Services</p>
                 </div>
             </div>
+            <i class="fa-regular fa-bell text-white text-lg"></i>
         </div>
     </header>
 
     <!-- PÁGINA DE VENDAS (HOME) -->
-    <main id="viewHome" class="flex-grow w-full">
-        <!-- Faixa de promoção de última hora, com contagem decrescente -->
-        <div id="promoBanner" class="hidden bg-red-600 text-white text-center py-2.5 px-4 text-xs md:text-sm font-bold">
-            <i class="fa-solid fa-bolt"></i> <span id="promoBannerTexto"></span> <span id="promoContador" class="ml-2 bg-red-800/60 px-2 py-0.5 rounded font-mono"></span>
-        </div>
+    <main id="viewHome" class="flex-grow w-full bg-slate-50">
+
+        <!-- Barra de pesquisa + cartão de campanha em destaque (logo visível, sem scroll) -->
+        <section class="bg-blue-900 px-4 pt-4 pb-8">
+            <div class="max-w-2xl mx-auto">
+                <div class="relative mb-4">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="pesquisaServicosHome" oninput="renderGridServicosHome()" placeholder="Como podemos ajudar?" class="w-full bg-white rounded-xl py-3.5 pl-11 pr-4 text-sm shadow-lg outline-none">
+                </div>
+
+                <div id="cartaoCampanhaDestaque" class="hidden bg-amber-400 rounded-2xl p-4 flex items-center justify-between shadow-xl">
+                    <div>
+                        <p id="cartaoCampanhaTitulo" class="font-black text-blue-950 text-sm leading-tight"></p>
+                        <p id="cartaoCampanhaContador" class="text-blue-900 text-[11px] font-bold mt-1"></p>
+                    </div>
+                    <button onclick="irParaPromocoes()" class="bg-blue-950 text-white text-xs font-black px-4 py-2.5 rounded-xl whitespace-nowrap">Ver Ofertas</button>
+                </div>
+            </div>
+        </section>
 
         <!-- Hero -->
-        <section id="heroSection" class="bg-gradient-to-br from-blue-900 to-blue-700 text-white px-4 py-14 text-center bg-cover bg-center relative">
-            <div id="heroOverlay" class="absolute inset-0 bg-blue-950/60 hidden"></div>
+        <section id="heroSection" class="bg-gradient-to-br from-blue-900 to-blue-700 text-white px-4 py-12 text-center bg-cover bg-center relative -mt-6 rounded-t-3xl">
+            <div id="heroOverlay" class="absolute inset-0 bg-blue-950/60 hidden rounded-t-3xl"></div>
             <div class="max-w-2xl mx-auto relative">
                 <span class="inline-block bg-amber-400 text-blue-950 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-4">20 Anos de Experiência</span>
                 <h1 id="heroTitulo" class="text-3xl md:text-5xl font-black mb-3 leading-tight">A sua casa, imaculada. Sem esforço.</h1>
                 <p id="heroSubtitulo" class="text-blue-100 text-sm md:text-lg mb-7">Limpeza profissional de estofos, colchões e superfícies — orçamento grátis em 1 minuto.</p>
                 <button onclick="abrirFunil()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-8 py-4 rounded-xl shadow-xl text-sm md:text-base"><i class="fa-solid fa-sparkles"></i> Pedir Orçamento Grátis</button>
-                <p class="text-[11px] text-blue-200 mt-4"><i class="fa-solid fa-star text-amber-400"></i> Avaliado por clientes reais no Facebook e Worten Resolve</p>
+                <button onclick="document.getElementById('secaoTestemunhos')?.scrollIntoView({behavior:'smooth'})" id="resumoAvaliacoesHero" class="hidden mx-auto mt-4 flex items-center gap-2 bg-white/10 hover:bg-white/20 rounded-full px-4 py-2"><span id="resumoAvaliacoesEstrelas" class="text-amber-400 text-sm"></span> <span id="resumoAvaliacoesTexto" class="text-xs font-bold text-white"></span></button>
                 <div id="redesSociaisHero" class="flex justify-center gap-4 mt-4"></div>
+            </div>
+        </section>
+
+        <!-- Galeria Antes/Depois — carrossel automático, em destaque logo no topo da página -->
+        <section id="secaoGaleria" class="bg-blue-950 px-4 py-8 hidden">
+            <div class="max-w-lg mx-auto">
+                <div class="flex items-center justify-center gap-2 mb-3">
+                    <span class="bg-amber-400 text-blue-950 text-[10px] font-black uppercase px-3 py-1 rounded-full">Trabalhos Reais</span>
+                </div>
+                <div id="carrosselGaleria" class="relative rounded-2xl overflow-hidden shadow-2xl bg-white" style="aspect-ratio: 4/3;"></div>
+                <div id="pontosGaleria" class="flex justify-center gap-1.5 mt-3"></div>
+            </div>
+        </section>
+
+        <!-- Faixa de promoção de última hora (texto livre, sitewide), com contagem decrescente -->
+        <div id="promoBanner" class="hidden bg-red-600 text-white text-center py-2.5 px-4 text-xs md:text-sm font-bold">
+            <i class="fa-solid fa-bolt"></i> <span id="promoBannerTexto"></span> <span id="promoContador" class="ml-2 bg-red-800/60 px-2 py-0.5 rounded font-mono"></span>
+        </div>
+
+        <!-- Testemunhos: reforço de confiança logo cedo na página, com resumo de avaliação em destaque -->
+        <section id="secaoTestemunhos" class="bg-white px-4 py-10 hidden border-b border-t">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-black mb-1">O que dizem os nossos clientes</h2>
+                    <p id="resumoAvaliacoesSecao" class="text-sm text-slate-500"></p>
+                </div>
+                <div id="gridTestemunhos" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
             </div>
         </section>
 
@@ -102,27 +145,10 @@
 
         <!-- Serviços -->
         <section class="max-w-5xl mx-auto px-4 py-10">
-            <h2 class="text-xl font-black mb-1 text-center">Os nossos serviços</h2>
+            <h2 class="text-xl font-black mb-1 text-center">Como podemos ajudar?</h2>
             <p class="text-xs text-slate-500 text-center mb-6">Escolha o que precisa e veja logo uma estimativa</p>
-            <div id="gridServicosHome" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="col-span-2 md:col-span-4 text-center py-8 text-xs text-slate-400">A carregar serviços...</div>
-            </div>
-        </section>
-
-        <!-- Galeria Antes/Depois e Vídeos -->
-        <section id="secaoGaleria" class="bg-blue-950 px-4 py-12 hidden">
-            <div class="max-w-5xl mx-auto">
-                <h2 class="text-2xl font-black mb-1 text-center text-white">Antes & Depois</h2>
-                <p class="text-xs text-blue-200 text-center mb-6">Trabalhos reais feitos pela Higilimp Services</p>
-                <div id="gridGaleria" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
-            </div>
-        </section>
-
-        <!-- Testemunhos -->
-        <section id="secaoTestemunhos" class="bg-slate-100 px-4 py-10 hidden">
-            <div class="max-w-4xl mx-auto">
-                <h2 class="text-xl font-black mb-6 text-center">O que dizem os nossos clientes</h2>
-                <div id="gridTestemunhos" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+            <div id="gridServicosHome" class="grid grid-cols-3 md:grid-cols-4 gap-x-3 gap-y-6">
+                <div class="col-span-3 md:col-span-4 text-center py-8 text-xs text-slate-400">A carregar serviços...</div>
             </div>
         </section>
 
@@ -773,7 +799,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, setDoc, getDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, setDoc, getDoc, deleteDoc, arrayUnion, enableMultiTabIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let firebaseConfig; try { firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null; } catch (e) {}
         let db = null; let auth = null; let isReady = false;
@@ -824,8 +850,18 @@
         }
         window.addEventListener('popstate', (e) => { aplicarEstadoView((e.state && e.state.view) || 'home'); });
 
+        // Aviso visual claro sempre que a app fica sem internet, e some assim que a ligação volta.
+        function atualizarAvisoOffline() { document.getElementById('avisoOffline')?.classList.toggle('hidden', navigator.onLine); }
+        window.addEventListener('online', atualizarAvisoOffline);
+        window.addEventListener('offline', atualizarAvisoOffline);
+        atualizarAvisoOffline();
+
         if (firebaseConfig) {
             const app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app);
+            // Ativa o modo offline: guarda uma cópia local de tudo o que já foi carregado (leads, catálogo, agenda, etc.),
+            // para poderes consultar mesmo sem internet. Qualquer alteração feita offline fica em espera e sincroniza
+            // automaticamente assim que a ligação voltar — sem apagar nem sobrepor nada indevidamente.
+            enableMultiTabIndexedDbPersistence(db).catch((err) => { console.warn('Modo offline não disponível neste browser:', err.code); });
             onAuthStateChanged(auth, (user) => { if (user) { isReady = true; iniciarDadosApp(); if(!document.getElementById('viewAdmin').classList.contains('hidden')) carregarDadosAdmin(); } });
             signInAnonymously(auth).catch(()=>{});
         }
@@ -897,7 +933,7 @@
                     itens.push({ catKey, catNome: cat.nome, idx, op });
                 });
             }
-            if(itens.length === 0) { sec.classList.add('hidden'); return; }
+            if(itens.length === 0) { sec.classList.add('hidden'); document.getElementById('cartaoCampanhaDestaque')?.classList.add('hidden'); return; }
             sec.classList.remove('hidden');
             grid.innerHTML = itens.map(({catKey, catNome, idx, op}) => {
                 const precoMostrar = op.precoCampanha > 0 ? op.precoCampanha : op.preco;
@@ -906,11 +942,23 @@
                 const contadorHtml = op.campanhaValidade ? `<p class="promo-contador text-[11px] font-mono font-black text-red-600 mt-1" data-validade="${op.campanhaValidade}">A calcular...</p>` : '';
                 return `<button onclick="abrirFunilItem('${d_safeAttr(catKey)}', ${idx})" class="bg-white rounded-xl p-4 text-left shadow-lg hover:scale-[1.02] transition"><p class="text-[10px] font-bold uppercase text-slate-400">${escHtml(catNome)}</p><p class="text-sm font-black mb-1">${escHtml(op.nome)}</p><div class="flex items-baseline gap-2">${temRiscado?`<span class="text-xs text-slate-400 line-through">${op.preco.toFixed(2)}€</span>`:''}<span class="text-xl font-black text-red-600">${op.tipoPreco==='orcamento'?'Sob consulta':precoMostrar.toFixed(2)+'€'}</span>${percent>0?`<span class="bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded">-${percent}%</span>`:''}</div>${contadorHtml}</button>`;
             }).join('');
+
+            // Cartão de destaque no topo (logo visível, à entrada) com a melhor promoção — a que expira mais cedo, ou a primeira
+            const destaque = document.getElementById('cartaoCampanhaDestaque');
+            if(destaque) {
+                const comValidade = itens.filter(it => it.op.campanhaValidade).sort((a,b) => new Date(a.op.campanhaValidade) - new Date(b.op.campanhaValidade));
+                const melhor = comValidade[0] || itens[0];
+                const percentD = melhor.op.precoCampanha > 0 && melhor.op.precoCampanha < melhor.op.preco ? Math.round(((melhor.op.preco - melhor.op.precoCampanha)/melhor.op.preco)*100) : 0;
+                document.getElementById('cartaoCampanhaTitulo').textContent = `${melhor.op.nome}${percentD>0?` — ${percentD}% de desconto`:' em promoção'}`;
+                const contadorEl = document.getElementById('cartaoCampanhaContador');
+                if(melhor.op.campanhaValidade) { contadorEl.classList.add('promo-contador-destaque'); contadorEl.dataset.validade = melhor.op.campanhaValidade; } else { contadorEl.textContent = 'Oferta por tempo limitado'; }
+                destaque.classList.remove('hidden');
+            }
             atualizarContadoresPromocao();
         }
 
         function atualizarContadoresPromocao() {
-            document.querySelectorAll('.promo-contador').forEach(el => {
+            document.querySelectorAll('.promo-contador, .promo-contador-destaque').forEach(el => {
                 const fim = new Date(el.dataset.validade); const diff = fim - new Date();
                 if(diff <= 0) { el.textContent = 'Terminado'; return; }
                 const dias = Math.floor(diff/86400000); const horas = Math.floor((diff%86400000)/3600000); const min = Math.floor((diff%3600000)/60000); const seg = Math.floor((diff%60000)/1000);
@@ -961,8 +1009,19 @@
             const secTest = document.getElementById('secaoTestemunhos');
             if(siteContent.testemunhos && siteContent.testemunhos.length > 0) {
                 secTest.classList.remove('hidden');
-                document.getElementById('gridTestemunhos').innerHTML = siteContent.testemunhos.map(t => `<div class="bg-white p-5 rounded-xl border">${t.imagemURL?`<img src="${escHtml(t.imagemURL)}" class="w-full rounded-lg mb-3" onerror="this.style.display='none'">`:''}<div class="text-amber-400 text-xs mb-2">${'★'.repeat(Math.max(1,Math.min(5,parseInt(t.estrelas)||5)))}</div>${t.texto?`<p class="text-sm text-slate-600 mb-3">"${escHtml(t.texto)}"</p>`:''}<p class="text-xs font-bold text-slate-800">— ${escHtml(t.nome)}</p>${t.linkOriginal?`<a href="${escHtml(t.linkOriginal)}" target="_blank" class="text-[10px] text-blue-600 underline mt-1 inline-block"><i class="fa-brands fa-facebook"></i> Ver original no Facebook</a>`:''}</div>`).join('');
-            } else secTest.classList.add('hidden');
+                document.getElementById('gridTestemunhos').innerHTML = siteContent.testemunhos.map(t => `<div class="bg-white p-5 rounded-xl border shadow-sm relative"><i class="fa-solid fa-quote-left text-slate-100 text-3xl absolute top-3 right-4"></i>${t.imagemURL?`<img src="${escHtml(t.imagemURL)}" class="w-full rounded-lg mb-3" onerror="this.style.display='none'">`:''}<div class="text-amber-400 text-sm mb-2">${'★'.repeat(Math.max(1,Math.min(5,parseInt(t.estrelas)||5)))}</div>${t.texto?`<p class="text-sm text-slate-600 mb-3 relative">"${escHtml(t.texto)}"</p>`:''}<p class="text-xs font-bold text-slate-800">— ${escHtml(t.nome)}</p>${t.linkOriginal?`<a href="${escHtml(t.linkOriginal)}" target="_blank" class="text-[10px] text-blue-600 underline mt-1 inline-block"><i class="fa-brands fa-facebook"></i> Ver original no Facebook</a>`:''}</div>`).join('');
+
+                // Resumo automático (média de estrelas + nº de avaliações), usado no herói e no topo desta secção
+                const notas = siteContent.testemunhos.map(t => Math.max(1, Math.min(5, parseInt(t.estrelas)||5)));
+                const media = (notas.reduce((s,n)=>s+n,0) / notas.length);
+                const mediaArredondada = Math.round(media);
+                const estrelasTxt = '★'.repeat(mediaArredondada) + '☆'.repeat(5-mediaArredondada);
+                const resumoTxt = `${media.toFixed(1)} · ${notas.length} avaliaç${notas.length===1?'ão':'ões'}`;
+                const heroResumo = document.getElementById('resumoAvaliacoesHero');
+                if(heroResumo) { document.getElementById('resumoAvaliacoesEstrelas').textContent = estrelasTxt; document.getElementById('resumoAvaliacoesTexto').textContent = resumoTxt; heroResumo.classList.remove('hidden'); }
+                const secResumo = document.getElementById('resumoAvaliacoesSecao');
+                if(secResumo) secResumo.textContent = `${estrelasTxt}  ${resumoTxt} no Facebook e Worten Resolve`;
+            } else { secTest.classList.add('hidden'); document.getElementById('resumoAvaliacoesHero')?.classList.add('hidden'); }
 
             renderGaleriaHome();
             renderGridServicosHome(); renderPromocoesRelampago();
@@ -983,21 +1042,29 @@
             } else { banner.classList.add('hidden'); if(window.__promoInterval) clearInterval(window.__promoInterval); }
         }
 
+        // Cores de destaque para os círculos dos ícones, ao estilo de apps como o Oscar — rodam automaticamente por categoria
+        const CORES_ICONES = ['bg-blue-100 text-blue-700', 'bg-amber-100 text-amber-700', 'bg-emerald-100 text-emerald-700', 'bg-purple-100 text-purple-700', 'bg-rose-100 text-rose-700', 'bg-cyan-100 text-cyan-700'];
+
         function renderGridServicosHome() {
             const grid = document.getElementById('gridServicosHome'); if(!grid) return;
-            const chaves = Object.keys(catalogoCompleto).filter(k => !catalogoCompleto[k].categoriaCampanha);
-            if(chaves.length === 0) { grid.innerHTML = '<div class="col-span-2 md:col-span-4 text-center py-8 text-xs text-slate-400">Ainda sem serviços disponíveis.</div>'; return; }
-            const modalidadeTxt = { domicilio: 'Ao domicílio', recolha: 'Recolha e entrega', domicilio_ou_recolha: 'Domicílio ou recolha' };
-            grid.innerHTML = chaves.map(k => {
+            const termo = (document.getElementById('pesquisaServicosHome')?.value || '').trim().toLowerCase();
+            let chaves = Object.keys(catalogoCompleto).filter(k => !catalogoCompleto[k].categoriaCampanha);
+            if(termo) chaves = chaves.filter(k => catalogoCompleto[k].nome.toLowerCase().includes(termo) || catalogoCompleto[k].opcoes.some(o => o.nome.toLowerCase().includes(termo)));
+            if(chaves.length === 0) { grid.innerHTML = `<div class="col-span-3 md:col-span-4 text-center py-8 text-xs text-slate-400">${termo ? 'Sem resultados para "'+escHtml(termo)+'".' : 'Ainda sem serviços disponíveis.'}</div>`; return; }
+            grid.innerHTML = chaves.map((k, i) => {
                 const cat = catalogoCompleto[k];
                 const comPreco = cat.opcoes.filter(o => o.tipoPreco !== 'orcamento' && o.preco > 0);
                 const precoMin = comPreco.length ? Math.min(...comPreco.map(o => precoEfetivo(o))) : null;
-                const precoTxt = precoMin ? `a partir de ${precoMin.toFixed(2)}€ (s/IVA)` : 'sob consulta';
-                const imagem = cat.imagemURL ? `<div class="h-24 -m-4 mb-3 rounded-t-xl bg-cover bg-center" style="background-image:url('${cat.imagemURL.replace(/'/g,"")}')"></div>` : `<i class="fa-solid ${escHtml(cat.icone)} text-2xl text-blue-600 mb-2 block"></i>`;
-                const seloModalidade = cat.modalidade ? `<p class="text-[9px] text-slate-400 mt-0.5">${modalidadeTxt[cat.modalidade]||''}</p>` : '';
-                return `<button onclick="abrirFunilCategoria('${d_safeAttr(k)}')" class="relative bg-white border rounded-xl p-4 text-center hover:border-blue-400 hover:shadow-md transition overflow-hidden">${imagem}<p class="text-xs font-bold uppercase leading-tight mb-1">${escHtml(cat.nome)}</p><p class="text-[10px] text-emerald-600 font-bold">${precoTxt}</p>${seloModalidade}</button>`;
+                const precoTxt = precoMin ? `${precoMin.toFixed(0)}€+` : 'orçamento';
+                const cor = CORES_ICONES[i % CORES_ICONES.length];
+                const circulo = cat.imagemURL
+                    ? `<div class="w-16 h-16 rounded-full bg-cover bg-center mx-auto shadow-md" style="background-image:url('${cat.imagemURL.replace(/'/g,"")}')"></div>`
+                    : `<div class="w-16 h-16 rounded-full ${cor} flex items-center justify-center mx-auto shadow-sm"><i class="fa-solid ${escHtml(cat.icone)} text-2xl"></i></div>`;
+                return `<button onclick="abrirFunilCategoria('${d_safeAttr(k)}')" class="text-center group"><div class="relative">${circulo}</div><p class="text-[11px] font-bold uppercase leading-tight mt-2 group-hover:text-blue-600">${escHtml(cat.nome)}</p><p class="text-[10px] text-emerald-600 font-black">${precoTxt}</p></button>`;
             }).join('');
         }
+
+        window.irParaPromocoes = () => { document.getElementById('secaoPromocoesRelampago')?.scrollIntoView({behavior:'smooth'}); }
 
         window.abrirFunilCategoria = (catKey) => { catAtual = catKey; window.selectCat(catKey, true); abrirFunil(); }
 
@@ -1639,9 +1706,19 @@
                 const pendente = l.estado === 'Aguarda Confirmação';
                 const dataP = l.dataAgendamento.split('T')[0]; const horaP = l.dataAgendamento.split('T')[1];
                 const gcalLink = gerarLinkGoogleCalendar(`${l.artigo} - ${l.nome}`, dataP, horaP, `Cliente: ${l.nome} | Tel: ${l.tel}`);
-                const mapsLink = l.local ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.local)}` : null;
-                return `<tr class="border-b hover:bg-slate-50 ${passado?'bg-red-50':pendente?'bg-amber-50':''}"><td class="p-4 text-xs font-bold">${dtStr}</td><td class="p-4 text-xs">${escHtml(l.nome)}<br><span class="font-mono text-[10px]">${escHtml(l.tel)}</span>${mapsLink?`<br><a href="${mapsLink}" target="_blank" class="text-[10px] text-blue-600 underline"><i class="fa-solid fa-location-dot"></i> ${escHtml(l.local)}</a>`:''}</td><td class="p-4 text-xs">${escHtml(l.artigo)}</td><td class="p-4 text-xs font-bold ${pendente?'text-amber-700':''}">${pendente?'⏳ ':''}${escHtml(l.estado)}</td><td class="p-4"><a href="${gcalLink}" target="_blank" class="text-blue-600 text-[11px] font-bold block"><i class="fa-brands fa-google"></i> Calendar</a></td></tr>`;
+                // Link de NAVEGAÇÃO direta (não só marcador) — ao abrir, o Google Maps mostra logo a hora de chegada estimada em tempo real, de forma 100% gratuita.
+                const navLink = l.local ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(l.local)}&travelmode=driving` : null;
+                const checkTxt = l.horaCheckIn ? `<br><span class="text-[10px] text-emerald-600">✓ Chegou ${new Date(l.horaCheckIn).toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}</span>` : '';
+                const checkOutTxt = l.horaCheckOut ? `<span class="text-[10px] text-blue-600"> · Saiu ${new Date(l.horaCheckOut).toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}</span>` : '';
+                return `<tr class="border-b hover:bg-slate-50 ${passado?'bg-red-50':pendente?'bg-amber-50':''}"><td class="p-4 text-xs font-bold">${dtStr}${checkTxt}${checkOutTxt}</td><td class="p-4 text-xs">${escHtml(l.nome)}<br><span class="font-mono text-[10px]">${escHtml(l.tel)}</span>${navLink?`<br><a href="${navLink}" target="_blank" class="text-[10px] text-blue-600 underline"><i class="fa-solid fa-diamond-turn-right"></i> Navegar até ${escHtml(l.local)}</a>`:''}</td><td class="p-4 text-xs">${escHtml(l.artigo)}</td><td class="p-4 text-xs font-bold ${pendente?'text-amber-700':''}">${pendente?'⏳ ':''}${escHtml(l.estado)}</td><td class="p-4 space-y-1"><a href="${gcalLink}" target="_blank" class="text-blue-600 text-[11px] font-bold block"><i class="fa-brands fa-google"></i> Calendar</a>${!l.horaCheckIn?`<button onclick="marcarCheckInOut('${d_safeId(l.id)}','horaCheckIn')" class="text-emerald-600 text-[11px] font-bold block"><i class="fa-solid fa-play"></i> Cheguei</button>`:(!l.horaCheckOut?`<button onclick="marcarCheckInOut('${d_safeId(l.id)}','horaCheckOut')" class="text-blue-600 text-[11px] font-bold block"><i class="fa-solid fa-stop"></i> Concluí</button>`:'')}</td></tr>`;
             }).join('') : '<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">Sem marcações agendadas.</td></tr>';
+        }
+
+        // Check-in/Check-out: regista a hora real de chegada e de saída de cada serviço — útil para controlares o teu tempo real por trabalho.
+        window.marcarCheckInOut = async (leadId, campo) => {
+            if(!db) return;
+            try { await updateDoc(doc(db, 'artifacts', __app_id, 'public', 'data', 'crm_leads', leadId), { [campo]: new Date().toISOString() }); }
+            catch(e) { alert('Erro ao registar.'); }
         }
 
         // ===== Disponibilidade (dias/horas de atendimento e bloqueios) =====
@@ -2075,22 +2152,41 @@
             cont.innerHTML = lista.length ? lista.map((g,i) => `<div class="flex justify-between items-center bg-slate-50 p-2 rounded border text-xs"><div><p class="font-bold">${escHtml(g.titulo||'(sem título)')}</p><p class="text-slate-400">${tipoLabel[g.tipo]||g.tipo}</p></div><button onclick="removerItemGaleria(${i})" class="text-red-500"><i class="fa-solid fa-trash"></i></button></div>`).join('') : '<p class="text-slate-400 text-xs">Galeria vazia.</p>';
         }
 
+        // Carrossel automático da galeria: mostra 1 item de cada vez, avança sozinho a cada 4 segundos,
+        // com pontos clicáveis por baixo. Ao estar no topo da página, é a primeira coisa que o visitante vê.
+        let galeriaSlideAtual = 0; let galeriaIntervalo = null;
+
         function renderGaleriaHome() {
-            const sec = document.getElementById('secaoGaleria'); const grid = document.getElementById('gridGaleria');
+            const sec = document.getElementById('secaoGaleria'); const carrossel = document.getElementById('carrosselGaleria'); const pontos = document.getElementById('pontosGaleria');
             const lista = siteContent.galeria || [];
-            if(lista.length === 0) { sec.classList.add('hidden'); return; }
+            if(lista.length === 0) { sec.classList.add('hidden'); if(galeriaIntervalo) clearInterval(galeriaIntervalo); return; }
             sec.classList.remove('hidden');
-            grid.innerHTML = lista.map(g => {
+
+            const slideHtml = (g) => {
                 if(g.tipo === 'video') {
                     const embedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(g.url)}&show_text=false`;
-                    return `<div class="bg-white rounded-xl overflow-hidden shadow-lg"><iframe src="${embedUrl}" class="w-full h-48 border-0" allowfullscreen loading="lazy"></iframe>${g.titulo?`<p class="text-xs font-bold p-2">${escHtml(g.titulo)}</p>`:''}</div>`;
+                    return `<iframe src="${embedUrl}" class="w-full h-full border-0" allowfullscreen loading="lazy"></iframe>`;
                 }
                 if(g.tipo === 'antes_depois') {
-                    const colFotos = (urls) => (urls||[]).slice(0,2).map(u => `<img src="${escHtml(u)}" class="w-full h-20 object-cover rounded" onerror="this.style.display='none'">`).join('');
-                    return `<div class="bg-white rounded-xl overflow-hidden shadow-lg p-2"><div class="grid grid-cols-2 gap-1"><div><p class="text-[9px] font-black text-center bg-slate-800 text-white rounded-t py-0.5">ANTES</p><div class="space-y-1 mt-1">${colFotos(g.antesUrls)}</div></div><div><p class="text-[9px] font-black text-center bg-emerald-600 text-white rounded-t py-0.5">DEPOIS</p><div class="space-y-1 mt-1">${colFotos(g.depoisUrls)}</div></div></div>${g.titulo?`<p class="text-xs font-bold mt-2 text-center">${escHtml(g.titulo)}</p>`:''}</div>`;
+                    const colFotos = (urls) => (urls||[]).slice(0,1).map(u => `<img src="${escHtml(u)}" class="w-full h-full object-cover" onerror="this.style.display='none'">`).join('');
+                    return `<div class="grid grid-cols-2 h-full"><div class="relative">${colFotos(g.antesUrls)}<span class="absolute top-2 left-2 bg-slate-900/80 text-white text-[10px] font-black px-2 py-0.5 rounded">ANTES</span></div><div class="relative">${colFotos(g.depoisUrls)}<span class="absolute top-2 left-2 bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5 rounded">DEPOIS</span></div></div>`;
                 }
-                return `<div class="bg-white rounded-xl overflow-hidden shadow-lg"><img src="${escHtml(g.url)}" class="w-full h-48 object-cover" onerror="this.style.display='none'">${g.titulo?`<p class="text-xs font-bold p-2">${escHtml(g.titulo)}</p>`:''}</div>`;
-            }).join('');
+                return `<img src="${escHtml(g.url)}" class="w-full h-full object-cover" onerror="this.style.display='none'">`;
+            };
+
+            carrossel.innerHTML = lista.map((g,i) => `<div class="galeria-slide absolute inset-0 transition-opacity duration-700 ${i===0?'opacity-100':'opacity-0 pointer-events-none'}" data-slide="${i}">${slideHtml(g)}${g.titulo?`<p class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white text-xs font-bold p-3">${escHtml(g.titulo)}</p>`:''}</div>`).join('');
+            pontos.innerHTML = lista.map((_,i) => `<button onclick="irParaSlideGaleria(${i})" class="w-2 h-2 rounded-full ${i===0?'bg-amber-400':'bg-white/40'}" data-ponto="${i}"></button>`).join('');
+
+            galeriaSlideAtual = 0;
+            if(galeriaIntervalo) clearInterval(galeriaIntervalo);
+            if(lista.length > 1) galeriaIntervalo = setInterval(() => irParaSlideGaleria((galeriaSlideAtual + 1) % lista.length), 4000);
+        }
+
+        window.irParaSlideGaleria = (i) => {
+            galeriaSlideAtual = i;
+            document.querySelectorAll('.galeria-slide').forEach(el => { const ativo = parseInt(el.dataset.slide) === i; el.classList.toggle('opacity-100', ativo); el.classList.toggle('opacity-0', !ativo); el.classList.toggle('pointer-events-none', !ativo); });
+            document.querySelectorAll('[data-ponto]').forEach(el => el.classList.toggle('bg-amber-400', parseInt(el.dataset.ponto) === i));
+            document.querySelectorAll('[data-ponto]').forEach(el => el.classList.toggle('bg-white/40', parseInt(el.dataset.ponto) !== i));
         }
     </script>
 </body>
