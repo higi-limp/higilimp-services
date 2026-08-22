@@ -124,7 +124,8 @@
             <div class="max-w-5xl mx-auto">
                 <div class="text-center mb-6">
                     <span class="inline-flex items-center gap-2 bg-white text-red-600 font-black text-xs uppercase tracking-widest px-4 py-1.5 rounded-full animate-pulse"><i class="fa-solid fa-bolt"></i> Promoções Relâmpago</span>
-                    <p class="text-white text-xs mt-2">Preços especiais por tempo limitado — não perca!</p>
+                    <p class="text-white text-xs mt-2">Preços especiais por tempo/vagas limitadas — não perca!</p>
+                    <p class="text-white/80 text-[11px] mt-1"><i class="fa-solid fa-circle-info"></i> Basta reservar dentro deste prazo — o serviço pode ser feito depois, na data que preferir.</p>
                 </div>
                 <div id="gridPromocoesRelampago" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
             </div>
@@ -320,6 +321,7 @@
         </div>
         <div class="flex gap-2 mb-6 overflow-x-auto">
             <button onclick="mudarTab('CRM')" id="tabCRM" class="tab-btn px-4 py-2 rounded-lg font-bold text-sm bg-blue-600 text-white">CRM & Ops</button>
+            <button onclick="mudarTab('Campanhas')" id="tabCampanhas" class="tab-btn px-4 py-2 rounded-lg font-bold text-sm bg-white border">🔥 Campanhas</button>
             <button onclick="mudarTab('Agenda')" id="tabAgenda" class="tab-btn px-4 py-2 rounded-lg font-bold text-sm bg-white border">Agenda</button>
             <button onclick="mudarTab('Faturacao')" id="tabFaturacao" class="tab-btn px-4 py-2 rounded-lg font-bold text-sm bg-white border">Faturação</button>
             <button onclick="mudarTab('Disponibilidade')" id="tabDisponibilidade" class="tab-btn px-4 py-2 rounded-lg font-bold text-sm bg-white border">Horários</button>
@@ -354,6 +356,60 @@
             <select id="manEstado" class="w-full p-3 rounded-lg border border-slate-300"><option>Agendado</option><option>Aguarda Confirmação</option><option>Fez Simulação</option><option>Aguardando Foto</option><option>Pago/Concluído</option></select>
             <textarea id="manNotas" placeholder="Notas internas (opcional)" rows="2" class="w-full p-3 rounded-lg border border-slate-300"></textarea>
         </div><button onclick="criarMarcacaoManual()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-4">Guardar Marcação</button><button onclick="document.getElementById('modalMarcacaoManual').classList.add('hidden')" class="w-full text-slate-400 text-xs mt-2">Cancelar</button></div></div>
+
+        <!-- CAMPANHAS: aba simples e dedicada, sem misturar com a gestão completa do catálogo -->
+        <div id="abaCampanhas" class="aba-admin hidden space-y-6">
+            <div class="bg-red-50 border border-red-200 rounded-2xl p-5">
+                <h3 class="font-black text-lg mb-1"><i class="fa-solid fa-bolt text-red-600"></i> Criar Campanha Rápida</h3>
+                <p class="text-xs text-slate-500 mb-4">Os preços já estão guardados no catálogo — só aplicas o desconto, e a app calcula tudo sozinha.</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500">Aplicar a</label>
+                        <select id="campAbrangencia" onchange="alternarAbrangenciaCampanha()" class="w-full p-2.5 border rounded">
+                            <option value="categoria">Categoria toda (todos os artigos)</option>
+                            <option value="artigo">Só um artigo específico</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500">Categoria</label>
+                        <select id="campCategoria" onchange="preencherArtigosCampanha()" class="w-full p-2.5 border rounded"><option value="">Escolha...</option></select>
+                    </div>
+                    <div id="campArtigoBox">
+                        <label class="text-[10px] font-bold text-slate-500">Artigo</label>
+                        <select id="campArtigo" class="w-full p-2.5 border rounded"><option value="">Escolha a categoria primeiro</option></select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500">Tipo de desconto</label>
+                        <div class="flex gap-2">
+                            <label class="flex-1 flex items-center justify-center gap-1.5 border rounded p-2 text-xs font-bold cursor-pointer has-[:checked]:bg-red-600 has-[:checked]:text-white"><input type="radio" name="campTipoDesconto" value="percent" checked class="hidden">%</label>
+                            <label class="flex-1 flex items-center justify-center gap-1.5 border rounded p-2 text-xs font-bold cursor-pointer has-[:checked]:bg-red-600 has-[:checked]:text-white"><input type="radio" name="campTipoDesconto" value="euro" class="hidden">€</label>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label class="text-[10px] font-bold text-slate-500">Valor do desconto</label><input type="number" id="campValorDesconto" min="0" placeholder="Ex: 20" class="w-full p-2.5 border rounded"></div>
+                        <div><label class="text-[10px] font-bold text-slate-500">Vagas limitadas (opcional)</label><input type="number" id="campVagas" min="1" placeholder="Ilimitadas" class="w-full p-2.5 border rounded"></div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500">Válida até (opcional — data/hora limite para reservar)</label>
+                        <input type="datetime-local" id="campValidade" class="w-full p-2.5 border rounded">
+                    </div>
+                    <p class="text-[11px] text-slate-500 bg-white border rounded-lg p-2"><i class="fa-solid fa-circle-info text-blue-500"></i> O cliente só precisa <strong>reservar</strong> dentro deste prazo/vagas — o serviço em si pode ser realizado depois, na data que combinarem.</p>
+                    <button onclick="ativarCampanhaRapida()" class="w-full bg-red-600 text-white font-black py-3 rounded-xl"><i class="fa-solid fa-bolt"></i> Ativar Campanha</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border p-5">
+                <h3 class="font-black mb-3">Campanhas Ativas</h3>
+                <div id="listaCampanhasAtivas" class="space-y-2"></div>
+            </div>
+
+            <div class="bg-white rounded-2xl border p-5">
+                <h3 class="font-black mb-1"><i class="fa-solid fa-robot text-blue-600"></i> Perguntas que o Assistente não soube responder</h3>
+                <p class="text-xs text-slate-500 mb-3">Revê estas perguntas — se quiseres que o assistente passe a responder a algo semelhante, diz-me e eu adiciono a resposta.</p>
+                <div id="listaDuvidasAssistente" class="space-y-1 max-h-64 overflow-y-auto"></div>
+            </div>
+        </div>
+
         <div id="abaClientes" class="aba-admin hidden"><div class="bg-white rounded-2xl border mb-6 overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-[10px] uppercase font-bold"><tr><th class="p-4">VIP</th><th class="p-4">LTV</th><th class="p-4">Ações</th></tr></thead><tbody id="listaClientes"></tbody></table></div><div id="listaVouchersAtivos" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
             <div class="bg-white p-6 rounded-2xl border space-y-3 text-sm">
                 <h3 class="font-black border-b pb-2"><i class="fa-brands fa-whatsapp text-emerald-600"></i> Campanha WhatsApp para todos os clientes</h3>
@@ -411,7 +467,7 @@
                 <button onclick="adicionarAoCatalogo()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg mt-4">Guardar Serviço</button>
                 <button onclick="importarCatalogoExemplo()" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-lg mt-2 text-xs"><i class="fa-solid fa-cloud-arrow-down"></i> Importar Catálogo com Preços de Mercado 2026</button>
             </div>
-            <div class="md:col-span-2 bg-white rounded-2xl border h-[500px] overflow-y-auto overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-[10px] uppercase font-bold sticky top-0"><tr><th class="p-2">Tipo/Duração</th><th class="p-2">Artigo</th><th class="p-2">Preço / Campanha (s/IVA)</th><th class="p-2">Ação</th></tr></thead><tbody id="listaCatalogoAdmin"></tbody></table></div>
+            <div class="md:col-span-2 bg-white rounded-2xl border h-[500px] overflow-y-auto overflow-x-auto"><table class="w-full text-left text-sm" style="min-width:520px"><thead class="bg-slate-50 text-[10px] uppercase font-bold sticky top-0"><tr><th class="p-2">Tipo/Duração</th><th class="p-2">Artigo</th><th class="p-2">Preço / Campanha (s/IVA)</th><th class="p-2">Ação</th></tr></thead><tbody id="listaCatalogoAdmin"></tbody></table></div>
         </div>
 
         <div id="abaSite" class="aba-admin hidden grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -837,7 +893,21 @@
         }
 
         // Devolve o preço realmente cobrado por um item: o de campanha/relâmpago se estiver ativo, senão o normal.
-        function campanhaValida(op) { if(!op.campanhaAtiva || !(op.precoCampanha > 0)) return false; if(!op.campanhaValidade) return true; return new Date(op.campanhaValidade) >= new Date(); }
+        function campanhaValida(op) {
+            if(!op.campanhaAtiva || !(op.precoCampanha > 0)) return false;
+            if(op.campanhaValidade && new Date(op.campanhaValidade) < new Date()) return false;
+            if(op.campanhaVagas && (op.campanhaVagasUsadas || 0) >= op.campanhaVagas) return false;
+            return true;
+        }
+        function vagasRestantes(op) { return op.campanhaVagas ? Math.max(0, op.campanhaVagas - (op.campanhaVagasUsadas || 0)) : null; }
+
+        // Prova social honesta: conta reservas REAIS feitas nesta categoria nos últimos 7 dias, a partir dos teus dados.
+        // Nunca mostra números inventados — se ninguém reservou de facto, simplesmente não aparece nada.
+        function contarReservasRecentes(catNome) {
+            const leads = window.memoriaLeadsGlobal || []; if(leads.length === 0) return 0;
+            const limite = new Date(); limite.setDate(limite.getDate() - 7);
+            return leads.filter(l => l.cat === catNome && l.timestamp && new Date(l.timestamp.seconds ? l.timestamp.seconds*1000 : l.timestamp) >= limite).length;
+        }
         function precoEfetivo(op) { return campanhaValida(op) ? op.precoCampanha : op.preco; }
 
         // ===== Suporte ao botão "Voltar" físico do telemóvel/browser =====
@@ -940,10 +1010,7 @@
             for(const catKey in catalogoCompleto) {
                 const cat = catalogoCompleto[catKey];
                 if(!cat.categoriaCampanha) continue;
-                cat.opcoes.forEach((op, idx) => {
-                    if(op.campanhaValidade && new Date(op.campanhaValidade) < new Date()) return; // já expirou
-                    itens.push({ catKey, catNome: cat.nome, idx, op });
-                });
+                cat.opcoes.forEach((op, idx) => { if(campanhaValida(op)) itens.push({ catKey, catNome: cat.nome, idx, op }); });
             }
             if(itens.length === 0) { sec.classList.add('hidden'); document.getElementById('cartaoCampanhaDestaque')?.classList.add('hidden'); return; }
             sec.classList.remove('hidden');
@@ -952,7 +1019,12 @@
                 const temRiscado = op.precoCampanha > 0 && op.precoCampanha < op.preco;
                 const percent = temRiscado ? Math.round(((op.preco - op.precoCampanha)/op.preco)*100) : 0;
                 const contadorHtml = op.campanhaValidade ? `<p class="promo-contador text-[11px] font-mono font-black text-red-600 mt-1" data-validade="${op.campanhaValidade}">A calcular...</p>` : '';
-                return `<button onclick="abrirFunilItem('${d_safeAttr(catKey)}', ${idx})" class="bg-white rounded-xl p-4 text-left shadow-lg hover:scale-[1.02] transition"><p class="text-[10px] font-bold uppercase text-slate-400">${escHtml(catNome)}</p><p class="text-sm font-black mb-1">${escHtml(op.nome)}</p><div class="flex items-baseline gap-2">${temRiscado?`<span class="text-xs text-slate-400 line-through">${op.preco.toFixed(2)}€</span>`:''}<span class="text-xl font-black text-red-600">${op.tipoPreco==='orcamento'?'Sob consulta':precoMostrar.toFixed(2)+'€'}</span>${percent>0?`<span class="bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded">-${percent}%</span>`:''}</div>${contadorHtml}</button>`;
+                const vagas = vagasRestantes(op);
+                const vagasHtml = vagas !== null ? `<p class="text-[11px] font-bold text-amber-600 mt-1"><i class="fa-solid fa-fire"></i> Só ${vagas} vaga(s) restante(s)</p>` : '';
+                // Prova social REAL (nunca inventada): conta reservas de facto feitas nesta categoria nos últimos 7 dias.
+                const reservasReais = contarReservasRecentes(catNome);
+                const socialHtml = reservasReais > 0 ? `<p class="text-[11px] font-bold text-emerald-600 mt-1"><i class="fa-solid fa-users"></i> ${reservasReais} pessoa(s) reservaram esta semana</p>` : '';
+                return `<button onclick="abrirFunilItem('${d_safeAttr(catKey)}', ${idx})" class="bg-white rounded-xl p-4 text-left shadow-lg hover:scale-[1.02] transition"><p class="text-[10px] font-bold uppercase text-slate-400">${escHtml(catNome)}</p><p class="text-sm font-black mb-1">${escHtml(op.nome)}</p><div class="flex items-baseline gap-2">${temRiscado?`<span class="text-xs text-slate-400 line-through">${op.preco.toFixed(2)}€</span>`:''}<span class="text-xl font-black text-red-600">${op.tipoPreco==='orcamento'?'Sob consulta':precoMostrar.toFixed(2)+'€'}</span>${percent>0?`<span class="bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded">-${percent}%</span>`:''}</div>${contadorHtml}${vagasHtml}${socialHtml}</button>`;
             }).join('');
 
             // Cartão de destaque no topo (logo visível, à entrada) — resume TODAS as categorias em campanha,
@@ -1310,7 +1382,7 @@
             const isOrcamento = tipo === 'orcamento';
             const temCampanha = campanhaValida(op);
             const precoUnit = precoEfetivo(op);
-            return { catNome: catalogoCompleto[catAtual].nome, nome: op.nome + sfx, tipo, isOrcamento, temCampanha, subtotal: isOrcamento ? 0 : mult*precoUnit, tab: isOrcamento ? 0 : mult*op.tab, duracaoMin: op.duracaoMin || 60 };
+            return { catKey: catAtual, opIdx: parseInt(idx), catNome: catalogoCompleto[catAtual].nome, nome: op.nome + sfx, tipo, isOrcamento, temCampanha, subtotal: isOrcamento ? 0 : mult*precoUnit, tab: isOrcamento ? 0 : mult*op.tab, duracaoMin: op.duracaoMin || 60 };
         }
 
         window.adicionarAoCarrinho = () => {
@@ -1473,7 +1545,11 @@
 
             const sub = parseFloat(vFinal.toFixed(2)); const iva = sub * 0.23; const tot = sub + iva;
 
-            if(db && isReady) { const vC = voucherAplicadoID ? vouchersTodosMemoria.find(x => x.id === voucherAplicadoID).codigo : null; try { const dR = await addDoc(collection(db, 'artifacts', __app_id, 'public', 'data', 'crm_leads'), { nome: n, tel: t, local: l, cat: carrinhoItens[0].catNome, artigo: nArtigo, valor: parseFloat(tot.toFixed(2)), isOrcamento: temOrcamento, voucherUsado: vC, referidoPor: codigoReferenciaAplicado || null, notas: kmExtra > 0 ? `Deslocação extra: ${kmExtra}km (+${custoKmExtra.toFixed(2)}€ s/IVA)` : '', estado: 'Aguarda Confirmação', dataAgendamento: `${dataHoraEscolhida.data}T${dataHoraEscolhida.hora}`, timestamp: serverTimestamp ? serverTimestamp() : new Date() }); leadIdAtual = dR.id; await addDoc(collection(db, 'artifacts', __app_id, 'public', 'data', 'agenda_slots'), { data: dataHoraEscolhida.data, hora: dataHoraEscolhida.hora, leadId: dR.id, nome: n, duracaoServicoMin: duracaoTotalMin, deslocacaoMin: disponibilidade.tempoDeslocacaoMin || 0 }); } catch(e) {} }
+            if(db && isReady) { const vC = voucherAplicadoID ? vouchersTodosMemoria.find(x => x.id === voucherAplicadoID).codigo : null; try { const dR = await addDoc(collection(db, 'artifacts', __app_id, 'public', 'data', 'crm_leads'), { nome: n, tel: t, local: l, cat: carrinhoItens[0].catNome, artigo: nArtigo, valor: parseFloat(tot.toFixed(2)), isOrcamento: temOrcamento, voucherUsado: vC, referidoPor: codigoReferenciaAplicado || null, notas: kmExtra > 0 ? `Deslocação extra: ${kmExtra}km (+${custoKmExtra.toFixed(2)}€ s/IVA)` : '', estado: 'Aguarda Confirmação', dataAgendamento: `${dataHoraEscolhida.data}T${dataHoraEscolhida.hora}`, timestamp: serverTimestamp ? serverTimestamp() : new Date() }); leadIdAtual = dR.id; await addDoc(collection(db, 'artifacts', __app_id, 'public', 'data', 'agenda_slots'), { data: dataHoraEscolhida.data, hora: dataHoraEscolhida.hora, leadId: dR.id, nome: n, duracaoServicoMin: duracaoTotalMin, deslocacaoMin: disponibilidade.tempoDeslocacaoMin || 0 });
+                // Desconta 1 vaga de cada artigo em campanha limitada que fez parte desta reserva
+                const itensComVagas = carrinhoItens.filter(it => it.temCampanha && it.catKey !== undefined && catalogoCompleto[it.catKey]?.opcoes[it.opIdx]?.campanhaVagas);
+                if(itensComVagas.length > 0) { let nC = JSON.parse(JSON.stringify(catalogoCompleto)); itensComVagas.forEach(it => { const op = nC[it.catKey].opcoes[it.opIdx]; op.campanhaVagasUsadas = (op.campanhaVagasUsadas || 0) + 1; }); await setDoc(doc(db, 'artifacts', __app_id, 'public', 'data', 'settings', 'catalog_master'), nC); }
+            } catch(e) {} }
             
             document.getElementById('resumoArtigo').textContent = nArtigo; document.getElementById('resumoDescontoBadge').textContent = tgUi;
             const temCampanhaNoCarrinho = carrinhoItens.some(it => it.temCampanha);
@@ -1530,7 +1606,15 @@
         }
 
         // ADMIN E CATALOGO
-        window.mudarTab = (t) => { document.querySelectorAll('.aba-admin').forEach(a => { a.classList.add('hidden'); }); document.getElementById(`aba${t}`).classList.remove('hidden'); if(t==='Catalogo' || t==='Site' || t==='Disponibilidade' || t==='Equipa') document.getElementById(`aba${t}`).classList.add('grid'); else document.getElementById(`aba${t}`).classList.add('block'); }
+        window.mudarTab = (t) => {
+            document.querySelectorAll('.aba-admin').forEach(a => { a.classList.add('hidden'); });
+            document.getElementById(`aba${t}`).classList.remove('hidden');
+            if(t==='Catalogo' || t==='Site' || t==='Disponibilidade' || t==='Equipa') document.getElementById(`aba${t}`).classList.add('grid'); else document.getElementById(`aba${t}`).classList.add('block');
+            document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('bg-blue-600','text-white'); b.classList.add('bg-white','border'); });
+            document.getElementById(`tab${t}`)?.classList.remove('bg-white','border');
+            document.getElementById(`tab${t}`)?.classList.add('bg-blue-600','text-white');
+            if(t==='Campanhas') renderAbaCampanhas();
+        }
 
         function pedirPermissaoNotificacao() { if('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); }
         function tocarSomNovoLead() {
@@ -1539,7 +1623,7 @@
         }
 
         function carregarDadosAdmin() {
-            if(!db) return; renderAdminCat(); pedirPermissaoNotificacao(); preencherFormularioSite(); preencherFormularioDisponibilidade(); preencherFormularioPrecosCondominio(); renderListaFuncionarios(); renderListaCompromissosPessoais(); renderAgenda(); renderListaSubscritoresAdmin();
+            if(!db) return; renderAdminCat(); pedirPermissaoNotificacao(); preencherFormularioSite(); preencherFormularioDisponibilidade(); preencherFormularioPrecosCondominio(); renderListaFuncionarios(); renderListaCompromissosPessoais(); renderAgenda(); renderListaSubscritoresAdmin(); renderAbaCampanhas();
             onSnapshot(collection(db, 'artifacts', __app_id, 'public', 'data', 'crm_leads'), (snap) => {
                 let leadsA = []; snap.forEach(d => leadsA.push({id: d.id, ...d.data()})); leadsA.sort((a,b) => (b.timestamp?.seconds||0) - (a.timestamp?.seconds||0));
                 if(!primeiraCargaLeads) { const idsNovos = leadsA.filter(l => !leadsAnteriores.has(l.id)); if(idsNovos.length > 0) tocarSomNovoLead(); }
@@ -2033,7 +2117,7 @@
                     const camp = op.campanhaAtiva && op.precoCampanha > 0;
                     h += `<tr class="${camp?'bg-red-50':''}"><td class="p-2 text-[10px] text-slate-500">${escHtml(op.tipoPreco)}<br><input type="number" value="${op.duracaoMin||60}" onchange="editarCampoCatalogo('${d_safeAttr(k)}',${i},'duracaoMin',this.value)" class="w-14 p-1 border rounded text-[10px] mt-1" title="Duração (min)">min</td>` +
                         `<td class="p-2 text-xs font-bold">${escHtml(op.nome)}</td>` +
-                        `<td class="p-2 text-xs">${op.tipoPreco==='orcamento' ? 'A Definir' : `<input type="number" step="0.01" value="${op.preco}" oninput="this.nextElementSibling.textContent=(parseFloat(this.value)*1.23||0).toFixed(2)+'€ c/IVA'" onchange="editarCampoCatalogo('${d_safeAttr(k)}',${i},'preco',this.value)" class="w-16 p-1 border rounded text-[11px]" title="Preço"><span class="text-[9px] text-slate-400 block">${(op.preco*1.23).toFixed(2)}€ c/IVA</span><input type="number" step="0.01" value="${op.tab}" oninput="this.nextElementSibling.textContent=(parseFloat(this.value)*1.23||0).toFixed(2)+'€ c/IVA'" onchange="editarCampoCatalogo('${d_safeAttr(k)}',${i},'tab',this.value)" class="w-16 p-1 border rounded text-[11px] mt-1" title="Preço de tabela (referência p/ vouchers)"><span class="text-[9px] text-slate-400 block">${(op.tab*1.23).toFixed(2)}€ c/IVA</span><br><span class="text-[9px] text-red-600 font-bold">% desconto:</span> <input type="number" step="1" min="0" max="95" value="${op.preco>0&&op.precoCampanha>0?Math.round(((op.preco-op.precoCampanha)/op.preco)*100):''}" onchange="editarPercentCampanha('${d_safeAttr(k)}',${i},this.value)" class="w-12 p-1 border rounded text-[11px] bg-red-50" title="Desconto %"> → <input type="number" step="0.01" value="${op.precoCampanha||''}" placeholder="preço camp." onchange="editarCampoCatalogo('${d_safeAttr(k)}',${i},'precoCampanha',this.value)" class="w-16 p-1 border rounded text-[11px]"><br><label class="text-[9px]"><input type="checkbox" ${camp?'checked':''} onchange="editarCampoCatalogo('${d_safeAttr(k)}',${i},'campanhaAtiva',this.checked)"> ativa</label><br><input type="datetime-local" value="${op.campanhaValidade||''}" onchange="editarCampoCatalogo('${d_safeAttr(k)}',${i},'campanhaValidade',this.value)" class="w-full p-1 border rounded text-[9px] mt-1" title="Válida até">`}</td>` +
+                        `<td class="p-2 text-xs">${op.tipoPreco==='orcamento' ? 'A Definir' : `<span class="text-[9px] font-black text-slate-500 uppercase block">Preço cobrado</span><input type="number" step="0.01" value="${op.preco}" oninput="this.nextElementSibling.textContent=(parseFloat(this.value)*1.23||0).toFixed(2)+'€ c/IVA'" onchange="editarCampoCatalogo('${d_safeAttr(k)}',${i},'preco',this.value)" class="w-20 p-1 border rounded text-[11px]" title="Preço"><span class="text-[9px] text-slate-400 block">${(op.preco*1.23).toFixed(2)}€ c/IVA</span><span class="text-[9px] font-black text-slate-500 uppercase block mt-1.5">Preço de tabela (ref. vouchers)</span><input type="number" step="0.01" value="${op.tab}" oninput="this.nextElementSibling.textContent=(parseFloat(this.value)*1.23||0).toFixed(2)+'€ c/IVA'" onchange="editarCampoCatalogo('${d_safeAttr(k)}',${i},'tab',this.value)" class="w-20 p-1 border rounded text-[11px]" title="Preço de tabela (referência p/ vouchers)"><span class="text-[9px] text-slate-400 block">${(op.tab*1.23).toFixed(2)}€ c/IVA</span><div class="border-t mt-2 pt-2"><span class="text-[9px] text-red-600 font-black uppercase block">🔥 Campanha/Promoção (opcional)</span><span class="text-[9px] text-red-600 font-bold">% desconto:</span> <input type="number" step="1" min="0" max="95" value="${op.preco>0&&op.precoCampanha>0?Math.round(((op.preco-op.precoCampanha)/op.preco)*100):''}" onchange="editarPercentCampanha('${d_safeAttr(k)}',${i},this.value)" class="w-12 p-1 border rounded text-[11px] bg-red-50" title="Desconto %"> → <input type="number" step="0.01" value="${op.precoCampanha||''}" placeholder="preço camp." onchange="editarCampoCatalogo('${d_safeAttr(k)}',${i},'precoCampanha',this.value)" class="w-16 p-1 border rounded text-[11px]"><br><label class="text-[9px]"><input type="checkbox" ${camp?'checked':''} onchange="editarCampoCatalogo('${d_safeAttr(k)}',${i},'campanhaAtiva',this.checked)"> ativa</label><br><input type="datetime-local" value="${op.campanhaValidade||''}" onchange="editarCampoCatalogo('${d_safeAttr(k)}',${i},'campanhaValidade',this.value)" class="w-full p-1 border rounded text-[9px] mt-1" title="Válida até"></div>`}</td>` +
                         `<td class="p-2"><button onclick="apagarDoCatalogo('${d_safeAttr(k)}',${i})" class="text-red-500"><i class="fa-solid fa-trash"></i></button></td></tr>`;
                 });
             }
@@ -2057,6 +2141,93 @@
             const novoPreco = percent > 0 ? parseFloat((op.preco * (1 - percent/100)).toFixed(2)) : 0;
             await editarCampoCatalogo(catKey, idx, 'precoCampanha', novoPreco);
         }
+
+        // ===== Aba "Campanhas" — forma rápida e simples de ativar promoções sem mexer no catálogo completo =====
+        function preencherCategoriasCampanha() {
+            const sel = document.getElementById('campCategoria'); if(!sel) return;
+            sel.innerHTML = '<option value="">Escolha...</option>' + Object.keys(catalogoCompleto).map(k => `<option value="${k}">${escHtml(catalogoCompleto[k].nome)}</option>`).join('');
+        }
+        window.preencherArtigosCampanha = () => {
+            const catKey = document.getElementById('campCategoria').value;
+            const sel = document.getElementById('campArtigo');
+            if(!catKey) { sel.innerHTML = '<option value="">Escolha a categoria primeiro</option>'; return; }
+            sel.innerHTML = catalogoCompleto[catKey].opcoes.map((o,i) => `<option value="${i}">${escHtml(o.nome)} (${o.preco.toFixed(2)}€)</option>`).join('');
+        }
+        window.alternarAbrangenciaCampanha = () => {
+            const artigo = document.getElementById('campAbrangencia').value === 'artigo';
+            document.getElementById('campArtigoBox').classList.toggle('hidden', !artigo);
+        }
+
+        // Calcula o preço de campanha de 1 artigo, seja o desconto em % ou em €
+        function calcularPrecoComDesconto(precoBase, tipo, valor) {
+            if(tipo === 'euro') return Math.max(0, parseFloat((precoBase - valor).toFixed(2)));
+            return Math.max(0, parseFloat((precoBase * (1 - valor/100)).toFixed(2)));
+        }
+
+        window.ativarCampanhaRapida = async () => {
+            const abrangencia = document.getElementById('campAbrangencia').value;
+            const catKey = document.getElementById('campCategoria').value;
+            const idx = document.getElementById('campArtigo').value;
+            const tipoDesconto = document.querySelector('input[name="campTipoDesconto"]:checked').value;
+            const valorDesconto = parseFloat(document.getElementById('campValorDesconto').value) || 0;
+            const vagas = parseInt(document.getElementById('campVagas').value) || 0;
+            const validade = document.getElementById('campValidade').value;
+            if(!catKey) return alert('Escolha a categoria.');
+            if(abrangencia === 'artigo' && idx === '') return alert('Escolha o artigo.');
+            if(valorDesconto <= 0) return alert('Indique o valor do desconto.');
+            if(!db) return;
+            let nC = JSON.parse(JSON.stringify(catalogoCompleto));
+            const aplicarEm = (op) => {
+                if(op.tipoPreco === 'orcamento' || !op.preco) return;
+                op.precoCampanha = calcularPrecoComDesconto(op.preco, tipoDesconto, valorDesconto);
+                op.campanhaAtiva = true;
+                op.campanhaValidade = validade || '';
+                op.campanhaVagas = vagas || null;
+                op.campanhaVagasUsadas = op.campanhaVagasUsadas || 0;
+            };
+            if(abrangencia === 'categoria') nC[catKey].opcoes.forEach(aplicarEm);
+            else aplicarEm(nC[catKey].opcoes[idx]);
+            nC[catKey].categoriaCampanha = true;
+            try {
+                await setDoc(doc(db, 'artifacts', __app_id, 'public', 'data', 'settings', 'catalog_master'), nC);
+                catalogoCompleto = nC; renderPromocoesRelampago(); renderGridServicosHome(); renderAbaCampanhas();
+                alert('Campanha ativada! Já está visível na página inicial.');
+                document.getElementById('campValorDesconto').value=''; document.getElementById('campVagas').value=''; document.getElementById('campValidade').value='';
+            } catch(err) { alert('Erro ao guardar: ' + err.message); }
+        }
+        window.desativarCampanhaRapida = async (catKey, idx) => {
+            if(!confirm('Desativar esta campanha? O artigo volta ao preço normal.')) return;
+            await editarCampoCatalogo(catKey, idx, 'campanhaAtiva', false);
+            renderAbaCampanhas();
+        }
+        function renderAbaCampanhas() {
+            preencherCategoriasCampanha();
+            const cont = document.getElementById('listaCampanhasAtivas'); if(!cont) return;
+            const ativas = [];
+            for(const catKey in catalogoCompleto) catalogoCompleto[catKey].opcoes.forEach((op,idx) => { if(op.campanhaAtiva && op.precoCampanha > 0) ativas.push({catKey, catNome: catalogoCompleto[catKey].nome, idx, op}); });
+            if(ativas.length === 0) { cont.innerHTML = '<p class="text-xs text-slate-400">Sem campanhas ativas no momento.</p>'; }
+            else cont.innerHTML = ativas.map(({catKey, catNome, idx, op}) => {
+                const expirada = op.campanhaValidade && new Date(op.campanhaValidade) < new Date();
+                const vagas = vagasRestantes(op);
+                const semVagas = vagas !== null && vagas <= 0;
+                const inativa = expirada || semVagas;
+                return `<div class="flex justify-between items-center border rounded-lg p-3 text-xs ${inativa?'bg-slate-100 opacity-60':'bg-red-50'}"><div><p class="font-bold">${escHtml(catNome)} — ${escHtml(op.nome)}</p><p class="text-slate-500">${op.preco.toFixed(2)}€ → <strong class="text-red-600">${op.precoCampanha.toFixed(2)}€</strong>${op.campanhaValidade?` · até ${new Date(op.campanhaValidade).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:''}${vagas!==null?` · ${vagas} vaga(s) restante(s)`:''}${inativa?' · <strong>TERMINADA</strong>':''}</p></div><button onclick="desativarCampanhaRapida('${d_safeAttr(catKey)}',${idx})" class="text-red-500 font-bold">Desativar</button></div>`;
+            }).join('');
+            renderDuvidasAssistente();
+        }
+
+        let duvidasListenerAtivo = false;
+        function renderDuvidasAssistente() {
+            const cont = document.getElementById('listaDuvidasAssistente'); if(!cont || !db || duvidasListenerAtivo) return;
+            duvidasListenerAtivo = true;
+            onSnapshot(collection(db, 'artifacts', __app_id, 'public', 'data', 'duvidas_assistente'), (snap) => {
+                const lista = []; snap.forEach(d => lista.push({id: d.id, ...d.data()}));
+                lista.sort((a,b) => (b.timestamp?.seconds||0) - (a.timestamp?.seconds||0));
+                if(lista.length === 0) { cont.innerHTML = '<p class="text-xs text-slate-400">Sem perguntas por responder — o assistente tem respondido a tudo.</p>'; return; }
+                cont.innerHTML = lista.slice(0,30).map(d => `<div class="flex justify-between items-center bg-slate-50 p-2 rounded text-xs"><span>${escHtml(d.pergunta)}</span><button onclick="apagarDuvidaAssistente('${d.id}')" class="text-red-500 ml-2"><i class="fa-solid fa-xmark"></i></button></div>`).join('');
+            });
+        }
+        window.apagarDuvidaAssistente = async (id) => { if(db) await deleteDoc(doc(db, 'artifacts', __app_id, 'public', 'data', 'duvidas_assistente', id)); }
 
         window.editarModalidadeCategoria = async (catKey, valor) => {
             if(!db) return;
@@ -2250,6 +2421,93 @@
             document.querySelectorAll('[data-ponto]').forEach(el => el.classList.toggle('bg-amber-400', parseInt(el.dataset.ponto) === i));
             document.querySelectorAll('[data-ponto]').forEach(el => el.classList.toggle('bg-white/40', parseInt(el.dataset.ponto) !== i));
         }
+
+        // ===== Assistente virtual: responde com dados AO VIVO da app, sem custos externos =====
+        // Não é uma IA que "aprende sozinha" — lê sempre os dados atuais (preços, horários, campanhas),
+        // por isso fica sempre atualizado automaticamente sempre que alterares algo no admin.
+        // Perguntas sem resposta ficam registadas para revisares depois.
+        let assistenteAberto = false;
+        window.abrirAssistente = () => {
+            document.getElementById('painelAssistente').classList.remove('hidden');
+            if(!assistenteAberto) {
+                assistenteAberto = true;
+                adicionarMensagemAssistente('Olá! Sou o assistente virtual da Higilimp Services. Pergunte-me sobre preços, horários, zona de atuação, condomínios, campanhas ou pagamentos.', 'bot');
+                renderSugestoesAssistente();
+            }
+        }
+        function adicionarMensagemAssistente(texto, quem) {
+            const cont = document.getElementById('mensagensAssistente');
+            const bolha = quem === 'bot'
+                ? `<div class="bg-white border rounded-xl rounded-tl-none p-3 text-xs max-w-[85%] shadow-sm">${texto}</div>`
+                : `<div class="bg-blue-700 text-white rounded-xl rounded-tr-none p-3 text-xs max-w-[85%] ml-auto shadow-sm">${escHtml(texto)}</div>`;
+            cont.insertAdjacentHTML('beforeend', bolha);
+            cont.scrollTop = cont.scrollHeight;
+        }
+        function renderSugestoesAssistente() {
+            const sugestoes = ['Preços', 'Horários', 'Zona de atuação', 'Campanhas ativas', 'Condomínios', 'Pagamentos'];
+            document.getElementById('sugestoesAssistente').innerHTML = sugestoes.map(s => `<button onclick="perguntarAssistente('${s}')" class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2.5 py-1 rounded-full">${s}</button>`).join('');
+        }
+        window.perguntarAssistente = (texto) => { document.getElementById('inputAssistente').value = texto; enviarPerguntaAssistente(); }
+        window.enviarPerguntaAssistente = () => {
+            const input = document.getElementById('inputAssistente');
+            const pergunta = input.value.trim(); if(!pergunta) return;
+            adicionarMensagemAssistente(pergunta, 'user'); input.value = '';
+            setTimeout(() => { const {resposta, encontrou} = responderAssistente(pergunta); adicionarMensagemAssistente(resposta, 'bot'); if(!encontrou) registarDuvidaAssistente(pergunta); }, 300);
+        }
+        function responderAssistente(perguntaOriginal) {
+            const p = perguntaOriginal.toLowerCase();
+            const wpp = (siteContent.whatsappNumero || '351928122918');
+            const linkWpp = `<a href="https://wa.me/${wpp.replace(/\D/g,'')}" target="_blank" class="text-blue-600 underline font-bold">WhatsApp</a>`;
+
+            if(/preç|preco|custa|valor|quanto/.test(p)) {
+                const exemplos = Object.values(catalogoCompleto).slice(0,3).map(c => { const comPreco = c.opcoes.filter(o=>o.preco>0); const min = comPreco.length ? Math.min(...comPreco.map(o=>precoEfetivo(o))) : null; return min ? `${c.nome}: a partir de ${min.toFixed(2)}€` : null; }).filter(Boolean).join(' · ');
+                return { resposta: `Os preços variam por tipo de serviço. Alguns exemplos: ${exemplos || 'consulte o catálogo na página inicial'}. Todos os valores são sem IVA (23%). Para um orçamento exato, use o botão "Pedir Orçamento Grátis" na página inicial!`, encontrou: true };
+            }
+            if(/hora|horári|aberto|funciona/.test(p)) {
+                const dias = disponibilidade.diasSemana || []; const nomesDias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+                return { resposta: `Trabalhamos ${dias.map(d=>nomesDias[d]).join(', ')}, das ${disponibilidade.horaInicio||'09:00'} às ${disponibilidade.horaFim||'18:00'}. Pode marcar diretamente pela app!`, encontrou: true };
+            }
+            if(/zona|área|onde|deslocaç|fafe|guimar|felgueiras/.test(p)) {
+                return { resposta: `Trabalhamos principalmente em ${document.getElementById('badgeZonaTexto')?.textContent || 'Fafe, Guimarães, Felgueiras e arredores'}. Deslocação grátis até ${disponibilidade.kmGratis||20}km da sede; acima disso, ${(disponibilidade.precoPorKmExtra||0.5).toFixed(2)}€/km extra.`, encontrou: true };
+            }
+            if(/campanh|promoç|desconto|relâmpago|oferta/.test(p)) {
+                const ativas = []; for(const k in catalogoCompleto) catalogoCompleto[k].opcoes.forEach(op => { if(campanhaValida(op)) ativas.push(`${catalogoCompleto[k].nome} - ${op.nome} (${op.precoCampanha.toFixed(2)}€)`); });
+                return { resposta: ativas.length ? `Temos campanhas ativas agora: ${ativas.join(', ')}. Veja a secção de Promoções Relâmpago na página inicial!` : 'De momento não há campanhas ativas, mas fique atento à página inicial — publicamos promoções regularmente!', encontrou: true };
+            }
+            if(/condomín|prédio|edifício/.test(p)) {
+                return { resposta: `Fazemos limpeza regular de condomínios (escadas, hall, garagens). O preço é calculado por patamar e nº de habitações. Use o botão "Pedir Proposta para o Meu Condomínio" na página inicial para uma simulação automática!`, encontrou: true };
+            }
+            if(/pagament|pagar|mbway|mb way|transferência|fatura/.test(p)) {
+                return { resposta: `Aceitamos transferência bancária, numerário e MB Way. Os preços mostrados na simulação são de tabela — ao enviar fotos do artigo pelo WhatsApp, pode beneficiar de descontos adicionais consoante o estado.`, encontrou: true };
+            }
+            if(/contact|telefone|whatsapp|falar|humano|pessoa/.test(p)) {
+                return { resposta: `Pode falar diretamente connosco pelo ${linkWpp}!`, encontrou: true };
+            }
+            return { resposta: `Ainda não tenho uma resposta pronta para isso. Vou registar a sua pergunta para melhorarmos — entretanto, fale diretamente connosco pelo ${linkWpp}!`, encontrou: false };
+        }
+        async function registarDuvidaAssistente(pergunta) {
+            if(!db) return;
+            try { await addDoc(collection(db, 'artifacts', __app_id, 'public', 'data', 'duvidas_assistente'), { pergunta, timestamp: serverTimestamp ? serverTimestamp() : new Date() }); } catch(e) {}
+        }
     </script>
+
+    <!-- Assistente virtual: responde com dados reais e ao vivo da app (preços, horários, campanhas, etc.) -->
+    <button onclick="abrirAssistente()" class="fixed bottom-5 right-5 z-40 bg-blue-700 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-robot"></i></button>
+
+    <div id="painelAssistente" class="hidden fixed inset-0 md:inset-auto md:bottom-24 md:right-5 z-50 md:w-96 md:max-h-[70vh] bg-white md:rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        <div class="bg-blue-700 text-white p-4 flex justify-between items-center flex-shrink-0">
+            <div><p class="font-black text-sm"><i class="fa-solid fa-robot"></i> Assistente Higilimp</p><p class="text-[10px] text-blue-200">Respostas automáticas, tira dúvidas rápidas</p></div>
+            <button onclick="document.getElementById('painelAssistente').classList.add('hidden')" class="text-white text-xl">&times;</button>
+        </div>
+        <div id="mensagensAssistente" class="flex-grow overflow-y-auto p-4 space-y-3 bg-slate-50"></div>
+        <div class="p-3 border-t bg-white flex-shrink-0">
+            <div id="sugestoesAssistente" class="flex flex-wrap gap-1.5 mb-2"></div>
+            <div class="flex gap-2">
+                <input type="text" id="inputAssistente" placeholder="Escreva a sua pergunta..." onkeydown="if(event.key==='Enter') enviarPerguntaAssistente()" class="flex-grow p-2.5 border rounded-lg text-sm outline-none">
+                <button onclick="enviarPerguntaAssistente()" class="bg-blue-700 text-white w-10 h-10 rounded-lg flex-shrink-0"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
