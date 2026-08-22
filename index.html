@@ -83,6 +83,15 @@
             </div>
         </section>
 
+        <!-- Serviços: logo a seguir ao herói, para minimizar o scroll até à ação principal -->
+        <section class="max-w-5xl mx-auto px-4 py-8">
+            <h2 class="text-xl font-black mb-1 text-center">Como podemos ajudar?</h2>
+            <p class="text-xs text-slate-500 text-center mb-5">Escolha o que precisa e veja logo uma estimativa</p>
+            <div id="gridServicosHome" class="grid grid-cols-3 md:grid-cols-4 gap-x-3 gap-y-6">
+                <div class="col-span-3 md:col-span-4 text-center py-8 text-xs text-slate-400">A carregar serviços...</div>
+            </div>
+        </section>
+
         <!-- Galeria Antes/Depois — carrossel automático, em destaque logo no topo da página -->
         <section id="secaoGaleria" class="bg-blue-950 px-4 py-8 hidden">
             <div class="max-w-lg mx-auto">
@@ -122,10 +131,10 @@
         </section>
 
         <!-- Sobre nós -->
-        <section class="max-w-3xl mx-auto px-4 py-12 text-center">
+        <section class="max-w-3xl mx-auto px-4 py-8 text-center">
             <div class="inline-flex items-center justify-center w-14 h-14 bg-blue-100 text-blue-700 rounded-full mb-4 text-2xl"><i class="fa-solid fa-award"></i></div>
             <h2 id="sobreTitulo" class="text-2xl font-black mb-3">20 Anos a Cuidar da Sua Casa</h2>
-            <p id="sobreTexto" class="text-sm text-slate-600 leading-relaxed">A Higilimp Services tem duas décadas de experiência em higienização profissional de sofás e carpetes, e foi pioneira a levar este tipo de serviço até casa dos clientes — desde estofos de automóveis, sofás, carpetes e artigos de bebé como carrinhos, a colchões e cadeiras. Há 3 anos alargámos a nossa área de atuação à limpeza geral de condomínios, passeios, muros e telhados.</p>
+            <p id="sobreTexto" class="text-sm text-slate-600 leading-relaxed">A Higilimp Services tem duas décadas de experiência em higienização profissional de sofás e carpetes, e foi pioneira a levar este tipo de serviço até casa dos clientes — desde estofos de automóveis, sofás, carpetes e artigos de bebé como carrinhos, a colchões e cadeiras. Há 3 anos alargámos a nossa área de atuação à limpeza geral de condomínios, passeios e muros.</p>
             <div class="flex flex-wrap justify-center gap-2 mt-5">
                 <span id="badgeZona" class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-800 text-[11px] font-bold px-3 py-1.5 rounded-full"><i class="fa-solid fa-location-dot"></i> <span id="badgeZonaTexto">Fafe · Guimarães · Felgueiras e arredores</span></span>
                 <span id="badgeDeslocacao" class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 text-[11px] font-bold px-3 py-1.5 rounded-full"><i class="fa-solid fa-truck-fast"></i> <span id="badgeDeslocacaoTexto">Deslocação grátis até 20km da sede (Paço Vieira, Guimarães)</span></span>
@@ -134,24 +143,16 @@
         </section>
 
         <!-- Condomínios / Empresas (B2B) -->
-        <section class="bg-blue-50 px-4 py-12">
+        <section class="bg-blue-50 px-4 py-8">
             <div class="max-w-3xl mx-auto text-center">
                 <div class="inline-flex items-center justify-center w-14 h-14 bg-blue-700 text-white rounded-full mb-4 text-2xl"><i class="fa-solid fa-building"></i></div>
                 <h2 id="condoTitulo" class="text-2xl font-black mb-3">Limpeza de Condomínios e Espaços Comuns</h2>
-                <p id="condoTexto" class="text-sm text-slate-600 mb-6 leading-relaxed">Há 3 anos ao serviço de administrações de condomínio, com limpeza regular de espaços comuns, passeios, muros e telhados. Se gere um condomínio ou edifício, peça já uma proposta personalizada.</p>
+                <p id="condoTexto" class="text-sm text-slate-600 mb-6 leading-relaxed">Há 3 anos ao serviço de administrações de condomínio, com limpeza regular de espaços comuns, passeios e muros. Se gere um condomínio ou edifício, peça já uma proposta personalizada.</p>
                 <button onclick="abrirModalCondominio()" class="bg-blue-700 hover:bg-blue-800 text-white font-black px-8 py-3.5 rounded-xl shadow-lg text-sm"><i class="fa-solid fa-file-signature"></i> Pedir Proposta para o Meu Condomínio</button>
             </div>
         </section>
 
         <!-- Serviços -->
-        <section class="max-w-5xl mx-auto px-4 py-10">
-            <h2 class="text-xl font-black mb-1 text-center">Como podemos ajudar?</h2>
-            <p class="text-xs text-slate-500 text-center mb-6">Escolha o que precisa e veja logo uma estimativa</p>
-            <div id="gridServicosHome" class="grid grid-cols-3 md:grid-cols-4 gap-x-3 gap-y-6">
-                <div class="col-span-3 md:col-span-4 text-center py-8 text-xs text-slate-400">A carregar serviços...</div>
-            </div>
-        </section>
-
         <!-- CTA final -->
         <section class="bg-blue-900 px-4 py-12 text-center text-white">
             <h2 class="text-xl font-black mb-2">Pronto para renovar os seus estofos?</h2>
@@ -280,7 +281,7 @@
                 <!-- PASSO 3 (Resumo C/ IVA) -->
                 <div id="step3" class="step-transition hidden fade-in">
                     <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl mb-6">
-                        <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Preço de Tabela (sem desconto)</p>
+                        <p id="resumoTipoPreco" class="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Preço de Tabela (sem desconto)</p>
                         <p id="resumoArtigo" class="text-sm text-blue-100 font-semibold mb-2">Artigo</p>
                         <span id="resumoDescontoBadge" class="bg-emerald-950 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded mb-3 inline-block"></span>
 
@@ -293,7 +294,7 @@
                     </div>
                     <div id="urgenciaDescontoBox" class="hidden bg-emerald-500 text-white rounded-xl p-3 mb-4 text-center font-bold text-sm"><i class="fa-solid fa-bolt"></i> <span id="urgenciaDescontoTexto"></span></div>
                     <div class="bg-amber-50 border border-amber-300 rounded-xl p-3 mb-4">
-                        <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" id="confirmaEnvioFotos" class="w-6 h-6 flex-shrink-0 accent-blue-600 mt-0.5"> <span class="text-xs text-amber-900"><strong>Este é o preço de tabela (sem desconto).</strong> Aconselhamos a fazer o pedido por WhatsApp ou email com foto(s) e descrição do artigo — assim pode beneficiar de descontos exclusivos e, conforme o interesse mútuo, acertarmos um valor mais em conta para ambas as partes. Confirmo que vou enviar essas informações, e que a marcação só fica confirmada depois de resposta da Higilimp Services.</span></label>
+                        <label class="flex items-start gap-3 cursor-pointer"><input type="checkbox" id="confirmaEnvioFotos" class="w-6 h-6 flex-shrink-0 accent-blue-600 mt-0.5"> <span class="text-xs text-amber-900"><strong id="resumoTextoDesconto">Este é o preço de tabela (sem desconto).</strong> Aconselhamos a fazer o pedido por WhatsApp ou email com foto(s) e descrição do artigo — assim pode beneficiar de descontos exclusivos e, conforme o interesse mútuo, acertarmos um valor mais em conta para ambas as partes. <strong>Quanto mais artigos incluir no mesmo pedido, maior a possibilidade de desconto adicional.</strong> Confirmo que vou enviar essas informações, e que a marcação só fica confirmada depois de resposta da Higilimp Services.</span></label>
                     </div>
                     <button onclick="enviarParaWhatsApp()" id="btnWpp" class="w-full bg-[#25D366] text-white font-black py-4 rounded-xl shadow-lg"><i class="fa-brands fa-whatsapp"></i> Enviar Pedido (WhatsApp)</button>
                 </div>
@@ -943,15 +944,19 @@
                 return `<button onclick="abrirFunilItem('${d_safeAttr(catKey)}', ${idx})" class="bg-white rounded-xl p-4 text-left shadow-lg hover:scale-[1.02] transition"><p class="text-[10px] font-bold uppercase text-slate-400">${escHtml(catNome)}</p><p class="text-sm font-black mb-1">${escHtml(op.nome)}</p><div class="flex items-baseline gap-2">${temRiscado?`<span class="text-xs text-slate-400 line-through">${op.preco.toFixed(2)}€</span>`:''}<span class="text-xl font-black text-red-600">${op.tipoPreco==='orcamento'?'Sob consulta':precoMostrar.toFixed(2)+'€'}</span>${percent>0?`<span class="bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded">-${percent}%</span>`:''}</div>${contadorHtml}</button>`;
             }).join('');
 
-            // Cartão de destaque no topo (logo visível, à entrada) com a melhor promoção — a que expira mais cedo, ou a primeira
+            // Cartão de destaque no topo (logo visível, à entrada) — resume TODAS as categorias em campanha,
+            // não apenas um artigo, para não dar a entender que só há uma oferta quando há várias.
             const destaque = document.getElementById('cartaoCampanhaDestaque');
             if(destaque) {
+                const categoriasUnicas = [...new Set(itens.map(it => it.catNome))];
+                let tituloTxt;
+                if(categoriasUnicas.length === 1) tituloTxt = `${categoriasUnicas[0]} em Campanha`;
+                else if(categoriasUnicas.length <= 3) tituloTxt = `${categoriasUnicas.join(', ')} em Campanha`;
+                else tituloTxt = `${itens.length} Artigos em Campanha`;
+                document.getElementById('cartaoCampanhaTitulo').textContent = tituloTxt;
                 const comValidade = itens.filter(it => it.op.campanhaValidade).sort((a,b) => new Date(a.op.campanhaValidade) - new Date(b.op.campanhaValidade));
-                const melhor = comValidade[0] || itens[0];
-                const percentD = melhor.op.precoCampanha > 0 && melhor.op.precoCampanha < melhor.op.preco ? Math.round(((melhor.op.preco - melhor.op.precoCampanha)/melhor.op.preco)*100) : 0;
-                document.getElementById('cartaoCampanhaTitulo').textContent = `${melhor.op.nome}${percentD>0?` — ${percentD}% de desconto`:' em promoção'}`;
                 const contadorEl = document.getElementById('cartaoCampanhaContador');
-                if(melhor.op.campanhaValidade) { contadorEl.classList.add('promo-contador-destaque'); contadorEl.dataset.validade = melhor.op.campanhaValidade; } else { contadorEl.textContent = 'Oferta por tempo limitado'; }
+                if(comValidade[0]) { contadorEl.classList.add('promo-contador-destaque'); contadorEl.dataset.validade = comValidade[0].op.campanhaValidade; } else { contadorEl.textContent = 'Oferta por tempo limitado'; }
                 destaque.classList.remove('hidden');
             }
             atualizarContadoresPromocao();
@@ -1292,8 +1297,9 @@
             if(tipo === 'm2') { mult = (parseFloat(document.getElementById('mComp').value)||0)*(parseFloat(document.getElementById('mLarg').value)||0); if(mult<=0) return {erro:'Introduza medidas válidas.'}; sfx = ` (${mult.toFixed(1)}m²)`; }
             if(tipo === 'hora') { mult = parseFloat(document.getElementById('mHoras').value)||1; if(mult<=0) return {erro:'Introduza uma duração válida.'}; sfx = ` (${mult}h)`; }
             const isOrcamento = tipo === 'orcamento';
+            const temCampanha = campanhaValida(op);
             const precoUnit = precoEfetivo(op);
-            return { catNome: catalogoCompleto[catAtual].nome, nome: op.nome + sfx, tipo, isOrcamento, subtotal: isOrcamento ? 0 : mult*precoUnit, tab: isOrcamento ? 0 : mult*op.tab, duracaoMin: op.duracaoMin || 60 };
+            return { catNome: catalogoCompleto[catAtual].nome, nome: op.nome + sfx, tipo, isOrcamento, temCampanha, subtotal: isOrcamento ? 0 : mult*precoUnit, tab: isOrcamento ? 0 : mult*op.tab, duracaoMin: op.duracaoMin || 60 };
         }
 
         window.adicionarAoCarrinho = () => {
@@ -1312,7 +1318,7 @@
             const box = document.getElementById('carrinhoBox'); if(!box) return;
             if(carrinhoItens.length === 0) { box.classList.add('hidden'); return; }
             box.classList.remove('hidden');
-            document.getElementById('listaCarrinho').innerHTML = carrinhoItens.map((it,i) => `<div class="flex justify-between items-center text-xs"><span>${escHtml(it.catNome)} — ${escHtml(it.nome)}${it.isOrcamento?' (a definir)':''}</span><span class="font-bold flex items-center gap-1 whitespace-nowrap">${it.isOrcamento?'':it.subtotal.toFixed(2)+'€'} <button type="button" onclick="removerDoCarrinho(${i})" class="text-red-500 ml-1"><i class="fa-solid fa-xmark"></i></button></span></div>`).join('');
+            document.getElementById('listaCarrinho').innerHTML = carrinhoItens.map((it,i) => `<div class="flex justify-between items-center text-xs"><span>${escHtml(it.catNome)} — ${escHtml(it.nome)}${it.isOrcamento?' (a definir)':''}${it.temCampanha?' <span class="bg-red-100 text-red-700 text-[9px] font-black px-1 py-0.5 rounded">🔥 Campanha</span>':''}</span><span class="font-bold flex items-center gap-1 whitespace-nowrap">${it.isOrcamento?'':it.subtotal.toFixed(2)+'€'} <button type="button" onclick="removerDoCarrinho(${i})" class="text-red-500 ml-1"><i class="fa-solid fa-xmark"></i></button></span></div>`).join('');
             document.getElementById('carrinhoTotal').textContent = carrinhoItens.reduce((s,it)=>s+it.subtotal,0).toFixed(2) + '€';
         }
 
@@ -1459,6 +1465,9 @@
             if(db && isReady) { const vC = voucherAplicadoID ? vouchersTodosMemoria.find(x => x.id === voucherAplicadoID).codigo : null; try { const dR = await addDoc(collection(db, 'artifacts', __app_id, 'public', 'data', 'crm_leads'), { nome: n, tel: t, local: l, cat: carrinhoItens[0].catNome, artigo: nArtigo, valor: parseFloat(tot.toFixed(2)), isOrcamento: temOrcamento, voucherUsado: vC, referidoPor: codigoReferenciaAplicado || null, notas: kmExtra > 0 ? `Deslocação extra: ${kmExtra}km (+${custoKmExtra.toFixed(2)}€ s/IVA)` : '', estado: 'Aguarda Confirmação', dataAgendamento: `${dataHoraEscolhida.data}T${dataHoraEscolhida.hora}`, timestamp: serverTimestamp ? serverTimestamp() : new Date() }); leadIdAtual = dR.id; await addDoc(collection(db, 'artifacts', __app_id, 'public', 'data', 'agenda_slots'), { data: dataHoraEscolhida.data, hora: dataHoraEscolhida.hora, leadId: dR.id, nome: n, duracaoServicoMin: duracaoTotalMin, deslocacaoMin: disponibilidade.tempoDeslocacaoMin || 0 }); } catch(e) {} }
             
             document.getElementById('resumoArtigo').textContent = nArtigo; document.getElementById('resumoDescontoBadge').textContent = tgUi;
+            const temCampanhaNoCarrinho = carrinhoItens.some(it => it.temCampanha);
+            if(temCampanhaNoCarrinho) { document.getElementById('resumoTipoPreco').textContent = 'Inclui Preço de Campanha 🔥'; document.getElementById('resumoTextoDesconto').textContent = 'Este valor já inclui o desconto de campanha ativo.'; }
+            else { document.getElementById('resumoTipoPreco').textContent = 'Preço de Tabela (sem desconto)'; document.getElementById('resumoTextoDesconto').textContent = 'Este é o preço de tabela (sem desconto).'; }
             const urgBox = document.getElementById('urgenciaDescontoBox');
             if(descontoImediatoAplicado > 0) { document.getElementById('urgenciaDescontoTexto').textContent = `Já está a poupar ${descontoImediatoAplicado.toFixed(2)}€ por marcar agora! Envie o pedido para garantir este valor.`; urgBox.classList.remove('hidden'); }
             else urgBox.classList.add('hidden');
@@ -1477,7 +1486,8 @@
             const n = document.getElementById('cliNome').value; const l = document.getElementById('cliLocal').value; 
             const tot = parseFloat(vFinal.toFixed(2)) + (parseFloat(vFinal.toFixed(2))*0.23);
             let txtV = tot===0 ? `A definir` : `${tot.toFixed(2)}€ (C/ IVA)`;
-            let msg = `Olá Higilimp Services! Sou o/a *${n}* de ${l}.\n🔹 *${nArtigo}*\n💰 *${txtV}* (preço de tabela, s/desconto)${vFmt}\n\n📸 Envio já foto(s) e descrição do estado do artigo, para vermos se há descontos exclusivos e acertarmos um valor mais em conta para ambas as partes.\n\n⏳ Fico a aguardar a vossa confirmação da data/hora.`;
+            const temCampanhaMsg = carrinhoItens.some(it => it.temCampanha);
+            let msg = `Olá Higilimp Services! Sou o/a *${n}* de ${l}.\n🔹 *${nArtigo}*\n💰 *${txtV}* (${temCampanhaMsg?'inclui preço de campanha':'preço de tabela, s/desconto'})${vFmt}\n\n📸 Envio já foto(s) e descrição do estado do artigo, para vermos se há descontos exclusivos e acertarmos um valor mais em conta para ambas as partes.\n\n⏳ Fico a aguardar a vossa confirmação da data/hora.`;
             const link = `https://wa.me/${(siteContent.whatsappNumero||'351928122918').replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`;
             document.getElementById('linkWppFallback').href = link;
             window.open(link, '_blank');
