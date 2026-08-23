@@ -21,7 +21,7 @@
          mostrar sempre a versão antiga): compara a versão atual do código com a última vista neste dispositivo, e
          se forem diferentes, força uma atualização real, sem entrar em ciclo infinito. -->
     <script>
-        const VERSAO_APP = 'v2026-08-24-3';
+        const VERSAO_APP = 'v2026-08-24-4';
         try {
             if (sessionStorage.getItem('higilimp_versao') !== VERSAO_APP) {
                 sessionStorage.setItem('higilimp_versao', VERSAO_APP);
@@ -507,14 +507,22 @@
                 <div><label class="text-[10px] font-bold text-slate-500">Duração estimada do serviço (min)</label><input type="number" id="catDuracaoMin" placeholder="60" value="60" class="w-full p-2 border rounded"></div>
                 <div class="bg-red-50 border border-red-200 rounded p-2 space-y-2">
                     <label class="text-[10px] font-bold text-red-700 uppercase">🔥 Campanha/Relâmpago (opcional)</label>
+                    <p class="text-[10px] text-slate-500">O desconto é sempre calculado sobre o <strong>Preço de Tabela</strong> (campo "Tab" acima), nunca sobre o preço normal.</p>
                     <div>
-                        <label class="text-[10px] font-bold text-slate-500">Desconto (%) — calcula o preço automaticamente</label>
-                        <input type="number" step="1" min="0" max="95" id="catDescontoPercent" placeholder="Ex: 20" oninput="calcularPrecoCampanhaPorPercent()" class="w-full p-2 border rounded">
+                        <label class="text-[10px] font-bold text-slate-500">Tipo de desconto</label>
+                        <div class="flex gap-2">
+                            <label class="flex-1 flex items-center justify-center gap-1.5 border rounded p-2 text-xs font-bold cursor-pointer has-[:checked]:bg-red-600 has-[:checked]:text-white"><input type="radio" name="catTipoDesconto" value="percent" checked onchange="calcularPrecoCampanhaPorPercent()" class="hidden">%</label>
+                            <label class="flex-1 flex items-center justify-center gap-1.5 border rounded p-2 text-xs font-bold cursor-pointer has-[:checked]:bg-red-600 has-[:checked]:text-white"><input type="radio" name="catTipoDesconto" value="euro" onchange="calcularPrecoCampanhaPorPercent()" class="hidden">€ de desconto</label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500" id="labelDescontoPercent">Valor do desconto — calcula o preço final automaticamente</label>
+                        <input type="number" step="0.01" min="0" id="catDescontoPercent" placeholder="Ex: 20" oninput="calcularPrecoCampanhaPorPercent()" class="w-full p-2 border rounded">
                     </div>
                     <p id="previewDescontoCampanha" class="text-[11px] font-bold text-slate-500 hidden"></p>
                     <div>
-                        <label class="text-[10px] font-bold text-slate-500">Preço de campanha (€, s/IVA) — calculado automaticamente, ou edite à mão</label>
-                        <input type="number" step="0.01" id="catPrecoCampanha" placeholder="Deixe em branco se não houver" oninput="calcularPercentPorPrecoCampanha()" class="w-full p-2 border rounded">
+                        <label class="text-[10px] font-bold text-slate-500">Preço final de campanha (€, s/IVA) — calculado automaticamente, ou edite à mão</label>
+                        <input type="number" step="0.01" id="catPrecoCampanha" placeholder="Deixe em branco se não houver" readonly class="w-full p-2 border rounded bg-slate-100">
                     </div>
                     <label class="flex items-center gap-2 text-[11px] font-bold mt-1"><input type="checkbox" id="catCampanhaAtiva"> Campanha ativa agora (usa este preço em vez do normal)</label>
                     <label class="text-[10px] font-bold text-slate-500 block mt-1">Válida até (opcional — aparece com contagem decrescente)</label>
@@ -1182,8 +1190,8 @@
             sec.classList.remove('hidden');
             grid.innerHTML = itens.map(({catKey, catNome, idx, op}) => {
                 const precoMostrar = op.precoCampanha > 0 ? op.precoCampanha : op.preco;
-                const temRiscado = op.precoCampanha > 0 && op.precoCampanha < op.preco;
-                const percent = temRiscado ? Math.round(((op.preco - op.precoCampanha)/op.preco)*100) : 0;
+                const temRiscado = op.precoCampanha > 0 && op.precoCampanha < op.tab;
+                const percent = temRiscado ? Math.round(((op.tab - op.precoCampanha)/op.tab)*100) : 0;
                 const contadorHtml = op.campanhaValidade ? `<p class="promo-contador text-[11px] font-mono font-black text-red-600 mt-1" data-validade="${op.campanhaValidade}">A calcular...</p>` : '';
                 const vagas = vagasRestantes(op);
                 const vagasHtml = vagas !== null ? `<p class="text-[11px] font-bold text-amber-600 mt-1"><i class="fa-solid fa-fire"></i> Só ${vagas} vaga(s) restante(s)</p>` : '';
@@ -1194,7 +1202,7 @@
                 // e mostra um exemplo concreto com os três níveis de preço (tabela → normal → campanha).
                 const unidadeTxt = op.tipoPreco === 'm2' ? '/m²' : (op.tipoPreco === 'hora' ? '/hora' : '');
                 const exemploHtml = gerarExemploUnidade(op, 'text-slate-500');
-                return `<button onclick="abrirFunilItem('${d_safeAttr(catKey)}', ${idx})" class="bg-white rounded-xl p-4 text-left shadow-lg hover:scale-[1.02] transition"><p class="text-[10px] font-bold uppercase text-slate-400">${escHtml(catNome)}</p><p class="text-sm font-black mb-1">${escHtml(op.nome)}</p><div class="flex items-baseline gap-2">${temRiscado?`<span class="text-xs text-slate-400 line-through">${op.preco.toFixed(2)}€${unidadeTxt}</span>`:''}<span class="text-xl font-black text-red-600">${op.tipoPreco==='orcamento'?'Sob consulta':precoMostrar.toFixed(2)+'€'+unidadeTxt}</span>${percent>0?`<span class="bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded">-${percent}%</span>`:''}</div>${exemploHtml}${contadorHtml}${vagasHtml}${socialHtml}</button>`;
+                return `<button onclick="abrirFunilItem('${d_safeAttr(catKey)}', ${idx})" class="bg-white rounded-xl p-4 text-left shadow-lg hover:scale-[1.02] transition"><p class="text-[10px] font-bold uppercase text-slate-400">${escHtml(catNome)}</p><p class="text-sm font-black mb-1">${escHtml(op.nome)}</p><div class="flex items-baseline gap-2">${temRiscado?`<span class="text-xs text-slate-400 line-through">${op.tab.toFixed(2)}€${unidadeTxt}</span>`:''}<span class="text-xl font-black text-red-600">${op.tipoPreco==='orcamento'?'Sob consulta':precoMostrar.toFixed(2)+'€'+unidadeTxt}</span>${percent>0?`<span class="bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded">-${percent}%</span>`:''}</div>${exemploHtml}${contadorHtml}${vagasHtml}${socialHtml}</button>`;
             }).join('');
 
             // Cartão de destaque no topo (logo visível, à entrada) — resume TODAS as categorias em campanha,
@@ -2382,24 +2390,16 @@
         }
 
         window.calcularPrecoCampanhaPorPercent = () => {
-            const preco = parseFloat(document.getElementById('catPreco').value) || 0;
-            const percent = parseFloat(document.getElementById('catDescontoPercent').value) || 0;
+            const tab = parseFloat(document.getElementById('catTab').value) || 0;
+            const valor = parseFloat(document.getElementById('catDescontoPercent').value) || 0;
+            const tipo = document.querySelector('input[name="catTipoDesconto"]:checked')?.value || 'percent';
+            document.getElementById('labelDescontoPercent').textContent = tipo === 'euro' ? 'Valor do desconto em € — calcula o preço final automaticamente' : 'Desconto em % — calcula o preço final automaticamente';
             const preview = document.getElementById('previewDescontoCampanha');
-            if(preco <= 0) { preview.classList.add('hidden'); return; }
-            if(percent <= 0) { preview.classList.add('hidden'); return; }
-            const precoNovo = preco * (1 - percent/100);
+            if(tab <= 0 || valor <= 0) { preview.classList.add('hidden'); document.getElementById('catPrecoCampanha').value = ''; return; }
+            const precoNovo = calcularPrecoComDesconto(tab, tipo, valor);
             document.getElementById('catPrecoCampanha').value = precoNovo.toFixed(2);
-            preview.textContent = `De ${preco.toFixed(2)}€ por ${precoNovo.toFixed(2)}€ (-${percent}%)`;
-            preview.classList.remove('hidden');
-        }
-        window.calcularPercentPorPrecoCampanha = () => {
-            const preco = parseFloat(document.getElementById('catPreco').value) || 0;
-            const precoCampanha = parseFloat(document.getElementById('catPrecoCampanha').value) || 0;
-            const preview = document.getElementById('previewDescontoCampanha');
-            if(preco <= 0 || precoCampanha <= 0 || precoCampanha >= preco) { preview.classList.add('hidden'); return; }
-            const percent = Math.round(((preco - precoCampanha)/preco)*100);
-            document.getElementById('catDescontoPercent').value = percent;
-            preview.textContent = `De ${preco.toFixed(2)}€ por ${precoCampanha.toFixed(2)}€ (-${percent}%)`;
+            const percentReal = tab > 0 ? Math.round(((tab - precoNovo)/tab)*100) : 0;
+            preview.textContent = `De ${tab.toFixed(2)}€ (tabela) por ${precoNovo.toFixed(2)}€ (-${percentReal}%)`;
             preview.classList.remove('hidden');
         }
 
@@ -2493,7 +2493,9 @@
             if(!db) return;
             const percent = parseFloat(percentValor) || 0;
             const op = catalogoCompleto[catKey]?.opcoes[idx]; if(!op) return;
-            const novoPreco = percent > 0 ? parseFloat((op.preco * (1 - percent/100)).toFixed(2)) : 0;
+            // O desconto é sempre calculado sobre o Preço de Tabela, nunca sobre o preço normal.
+            const novoPreco = percent > 0 ? parseFloat((op.tab * (1 - percent/100)).toFixed(2)) : 0;
+            if(op.precoCampanha > 0) await editarCampoCatalogo(catKey, idx, 'campanhaPrecoAnterior', op.precoCampanha);
             await editarCampoCatalogo(catKey, idx, 'precoCampanha', novoPreco);
         }
 
@@ -2533,8 +2535,10 @@
             if(!db) return;
             let nC = JSON.parse(JSON.stringify(catalogoCompleto));
             const aplicarEm = (op) => {
-                if(op.tipoPreco === 'orcamento' || !op.preco) return;
-                op.precoCampanha = calcularPrecoComDesconto(op.preco, tipoDesconto, valorDesconto);
+                if(op.tipoPreco === 'orcamento' || !op.tab) return;
+                if(op.precoCampanha > 0) op.campanhaPrecoAnterior = op.precoCampanha;
+                // O desconto é sempre calculado sobre o Preço de Tabela, nunca sobre o preço normal — garante consistência entre campanhas.
+                op.precoCampanha = calcularPrecoComDesconto(op.tab, tipoDesconto, valorDesconto);
                 op.campanhaAtiva = true;
                 op.campanhaValidade = validade || '';
                 op.campanhaVagas = vagas || null;
@@ -2559,7 +2563,7 @@
         window.abrirCartazCampanha = (catKey, idx) => {
             const cat = catalogoCompleto[catKey]; const op = cat.opcoes[idx]; if(!op) return;
             const unidadeTxt = op.tipoPreco === 'm2' ? '/m²' : (op.tipoPreco === 'hora' ? '/hora' : '');
-            const percent = op.preco > 0 && op.precoCampanha > 0 && op.precoCampanha < op.preco ? Math.round(((op.preco - op.precoCampanha)/op.preco)*100) : 0;
+            const percent = op.tab > 0 && op.precoCampanha > 0 && op.precoCampanha < op.tab ? Math.round(((op.tab - op.precoCampanha)/op.tab)*100) : 0;
             const vagas = vagasRestantes(op);
             const validadeTxt = op.campanhaValidade ? `Até ${new Date(op.campanhaValidade).toLocaleDateString('pt-PT', {day:'2-digit', month:'long'})}` : 'Por tempo limitado';
             const logoHtml = siteContent.logoURL ? `<img src="${escHtml(siteContent.logoURL)}" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-white">` : `<div class="w-16 h-16 rounded-full bg-white text-blue-900 font-black text-2xl flex items-center justify-center mx-auto mb-3">H</div>`;
@@ -2574,7 +2578,7 @@
                         <p class="text-sm font-bold text-blue-200 uppercase mb-1">${escHtml(cat.nome)}</p>
                         <p class="text-xl font-black mb-4">${escHtml(op.nome)}</p>
                         <div class="flex items-center justify-center gap-3 mb-2">
-                            ${percent>0?`<span class="text-lg text-blue-300 line-through">${op.preco.toFixed(2)}€${unidadeTxt}</span>`:''}
+                            ${percent>0?`<span class="text-lg text-blue-300 line-through">${op.tab.toFixed(2)}€${unidadeTxt}</span>`:''}
                             <span class="text-4xl font-black text-amber-400">${op.precoCampanha.toFixed(2)}€${unidadeTxt}</span>
                         </div>
                         ${gerarExemploUnidade(op, 'text-blue-200')}
@@ -2602,7 +2606,8 @@
                 const inativa = expirada || semVagas;
                 // Deixa sempre claro quando o preço é por m² ou por hora, nunca o total, também aqui no admin.
                 const unidadeTxt = op.tipoPreco === 'm2' ? '/m²' : (op.tipoPreco === 'hora' ? '/hora' : '');
-                return `<div class="flex justify-between items-center border rounded-lg p-3 text-xs ${inativa?'bg-slate-100 opacity-60':'bg-red-50'}"><div><p class="font-bold">${escHtml(catNome)} — ${escHtml(op.nome)}</p><p class="text-slate-500">${op.preco.toFixed(2)}€${unidadeTxt} → <strong class="text-red-600">${op.precoCampanha.toFixed(2)}€${unidadeTxt}</strong>${op.campanhaValidade?` · até ${new Date(op.campanhaValidade).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:''}${vagas!==null?` · ${vagas} vaga(s) restante(s)`:''}${inativa?' · <strong>TERMINADA</strong>':''}</p></div><div class="flex gap-2 flex-shrink-0"><button onclick="abrirCartazCampanha('${d_safeAttr(catKey)}',${idx})" class="text-blue-600 font-bold" title="Ver cartaz para partilhar"><i class="fa-solid fa-image"></i></button><button onclick="desativarCampanhaRapida('${d_safeAttr(catKey)}',${idx})" class="text-red-500 font-bold">Desativar</button></div></div>`;
+                const comparacaoTxt = op.campanhaPrecoAnterior ? ` <span class="text-slate-400">(campanha anterior: ${op.campanhaPrecoAnterior.toFixed(2)}€${unidadeTxt})</span>` : '';
+                return `<div class="flex justify-between items-center border rounded-lg p-3 text-xs ${inativa?'bg-slate-100 opacity-60':'bg-red-50'}"><div><p class="font-bold">${escHtml(catNome)} — ${escHtml(op.nome)}</p><p class="text-slate-500">Tabela: ${op.tab.toFixed(2)}€${unidadeTxt} → <strong class="text-red-600">${op.precoCampanha.toFixed(2)}€${unidadeTxt}</strong>${comparacaoTxt}${op.campanhaValidade?` · até ${new Date(op.campanhaValidade).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:''}${vagas!==null?` · ${vagas} vaga(s) restante(s)`:''}${inativa?' · <strong>TERMINADA</strong>':''}</p></div><div class="flex gap-2 flex-shrink-0"><button onclick="abrirCartazCampanha('${d_safeAttr(catKey)}',${idx})" class="text-blue-600 font-bold" title="Ver cartaz para partilhar"><i class="fa-solid fa-image"></i></button><button onclick="desativarCampanhaRapida('${d_safeAttr(catKey)}',${idx})" class="text-red-500 font-bold">Desativar</button></div></div>`;
             }).join('');
             renderDuvidasAssistente();
         }
