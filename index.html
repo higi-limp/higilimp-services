@@ -21,7 +21,7 @@
          mostrar sempre a versão antiga): compara a versão atual do código com a última vista neste dispositivo, e
          se forem diferentes, força uma atualização real, sem entrar em ciclo infinito. -->
     <script>
-        const VERSAO_APP = 'v2026-08-23-1';
+        const VERSAO_APP = 'v2026-08-23-3';
         try {
             if (sessionStorage.getItem('higilimp_versao') !== VERSAO_APP) {
                 sessionStorage.setItem('higilimp_versao', VERSAO_APP);
@@ -38,6 +38,11 @@
     <meta property="og:title" content="Higilimp Services - Orçamento Grátis">
     <meta property="og:description" content="Limpeza profissional de sofás, colchões e estofos. Simulação de orçamento grátis em 1 minuto.">
     <meta property="og:type" content="website">
+    <meta property="og:image" content="https://i.postimg.cc/jqG1VMPQ/1754318085063.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://i.postimg.cc/jqG1VMPQ/1754318085063.jpg">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%231e3a8a%22/><text x=%2250%22 y=%2268%22 font-size=%2260%22 font-weight=%22900%22 text-anchor=%22middle%22 fill=%22white%22>H</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -86,8 +91,9 @@
         <section class="bg-blue-900 px-4 pt-4 pb-8">
             <div class="max-w-2xl mx-auto">
                 <div class="relative mb-4">
-                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="pesquisaServicosHome" oninput="renderGridServicosHome()" placeholder="Como podemos ajudar?" class="w-full bg-white rounded-xl py-3.5 pl-11 pr-4 text-sm shadow-lg outline-none">
+                    <i class="fa-solid fa-robot absolute left-4 top-1/2 -translate-y-1/2 text-blue-400"></i>
+                    <input type="text" id="pesquisaServicosHome" onkeydown="if(event.key==='Enter') perguntarBarraTopo()" oninput="renderGridServicosHome()" placeholder="Pergunte-nos algo — preços, horários, campanhas..." class="w-full bg-white rounded-xl py-3.5 pl-11 pr-16 text-sm shadow-lg outline-none">
+                    <button onclick="perguntarBarraTopo()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-lg"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
 
                 <div id="cartaoCampanhaDestaque" class="hidden bg-amber-400 rounded-2xl p-4 flex items-center justify-between shadow-xl">
@@ -2477,6 +2483,16 @@
                 adicionarMensagemAssistente('Olá! Sou o assistente virtual da Higilimp Services. Pergunte-me sobre preços, horários, zona de atuação, condomínios, campanhas ou pagamentos.', 'bot');
                 renderSugestoesAssistente();
             }
+        }
+        // A barra de pesquisa do topo da página passou a abrir e a perguntar diretamente ao assistente de IA.
+        window.perguntarBarraTopo = () => {
+            const valor = document.getElementById('pesquisaServicosHome').value.trim();
+            if(!valor) { abrirAssistente(); return; }
+            abrirAssistente();
+            document.getElementById('inputAssistente').value = valor;
+            enviarPerguntaAssistente();
+            document.getElementById('pesquisaServicosHome').value = '';
+            renderGridServicosHome();
         }
         function adicionarMensagemAssistente(texto, quem) {
             const cont = document.getElementById('mensagensAssistente');
