@@ -21,7 +21,7 @@
          mostrar sempre a versão antiga): compara a versão atual do código com a última vista neste dispositivo, e
          se forem diferentes, força uma atualização real, sem entrar em ciclo infinito. -->
     <script>
-        const VERSAO_APP = 'v2026-08-23-4';
+        const VERSAO_APP = 'v2026-08-23-6';
         try {
             if (sessionStorage.getItem('higilimp_versao') !== VERSAO_APP) {
                 sessionStorage.setItem('higilimp_versao', VERSAO_APP);
@@ -72,6 +72,7 @@
     <!-- NAVBAR -->
     <header class="bg-blue-900 shadow-lg sticky top-0 z-40">
         <div id="avisoOffline" class="hidden bg-amber-500 text-blue-950 text-center text-[11px] font-bold py-1.5"><i class="fa-solid fa-wifi"></i> Sem ligação — a mostrar os últimos dados guardados. As alterações vão sincronizar quando a internet voltar.</div>
+        <div id="avisoNavegadorInterno" class="hidden bg-amber-400 text-blue-950 text-center text-[11px] font-bold py-2 px-3"><i class="fa-solid fa-triangle-exclamation"></i> Está a ver isto dentro do Facebook/Instagram — pode não estar sempre atualizado. <button onclick="abrirNoNavegadorExterno()" class="underline font-black">Abrir no navegador ↗</button></div>
         <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3 cursor-pointer" onclick="abrirModalAdmin()">
                 <div id="headerLogoBox" class="w-10 h-10 bg-white rounded-lg flex items-center justify-center font-black text-xl text-blue-900 overflow-hidden">H</div>
@@ -987,6 +988,25 @@
         window.addEventListener('offline', atualizarAvisoOffline);
         atualizarAvisoOffline();
 
+        // Deteta se está a ser vista dentro do browser interno do Facebook/Instagram/Messenger (conhecidos por
+        // guardar páginas antigas em cache) e sugere abrir no navegador normal, onde está sempre atualizada.
+        (function() {
+            const ua = navigator.userAgent || '';
+            const dentroDeApp = /FBAN|FBAV|FB_IAB|Instagram|Messenger|Line\//i.test(ua);
+            if(dentroDeApp) document.getElementById('avisoNavegadorInterno')?.classList.remove('hidden');
+        })();
+        window.abrirNoNavegadorExterno = () => {
+            const ehAndroid = /Android/i.test(navigator.userAgent);
+            const url = location.href.split('#')[0];
+            if(ehAndroid) {
+                // No Android, este link "intent" abre diretamente no Chrome (ou navegador padrão), saltando o browser interno.
+                const urlSemProtocolo = url.replace(/^https?:\/\//, '');
+                window.location.href = `intent://${urlSemProtocolo}#Intent;scheme=https;action=android.intent.action.VIEW;end`;
+            } else {
+                alert('No iPhone: toque nos "⋯" ou "☖" no canto do ecrã e escolha "Abrir no Safari" (a Apple não permite abrir automaticamente).');
+            }
+        }
+
         if (firebaseConfig) {
             const app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app);
             // Ativa o modo offline: guarda uma cópia local de tudo o que já foi carregado (leads, catálogo, agenda, etc.),
@@ -1011,10 +1031,25 @@
 
         function iniciarDadosApp() {
             if(!db) return;
+            // Se o catálogo não chegar a carregar dentro de 8 segundos (falha de rede, permissões, etc.),
+            // mostra um aviso claro com botão para tentar de novo — em vez de ficar preso em "A carregar..." para sempre.
+            const timeoutCarregamento = setTimeout(() => {
+                if(Object.keys(catalogoCompleto).length === 0) {
+                    const grid = document.getElementById('gridServicosHome');
+                    if(grid) grid.innerHTML = '<div class="col-span-3 md:col-span-4 text-center py-8"><p class="text-xs text-red-500 font-bold mb-2">Não foi possível carregar os serviços (verifique a sua ligação à internet).</p><button onclick="location.reload()" class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg">Tentar novamente</button></div>';
+                }
+            }, 8000);
+
             onSnapshot(doc(db, 'artifacts', __app_id, 'public', 'data', 'settings', 'catalog_master'), (s) => {
+                clearTimeout(timeoutCarregamento);
                 if(s.exists() && Object.keys(s.data()).length > 0) catalogoCompleto = s.data();
                 else { catalogoCompleto = { 'sofas': { id: 'sofas', icone: 'fa-couch', nome: 'Sofás', opcoes: [ { id: 's1', nome: 'Sofá 2 Lug', preco: 45, tab: 70, tipoPreco: 'unitario' } ] } }; setDoc(doc(db, 'artifacts', __app_id, 'public', 'data', 'settings', 'catalog_master'), catalogoCompleto); }
                 renderizarUiCat(); window.selectCat(catAtual, true); if(!document.getElementById('viewAdmin').classList.contains('hidden')) renderAdminCat();
+            }, (erro) => {
+                // Mostra o erro real do Firestore em vez de falhar silenciosamente — essencial para conseguirmos diagnosticar.
+                clearTimeout(timeoutCarregamento);
+                const grid = document.getElementById('gridServicosHome');
+                if(grid) grid.innerHTML = `<div class="col-span-3 md:col-span-4 text-center py-8"><p class="text-xs text-red-500 font-bold mb-2">Erro ao carregar: ${escHtml(erro.code || erro.message || 'desconhecido')}</p><button onclick="location.reload()" class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg">Tentar novamente</button></div>`;
             });
             // NOTA DE SEGURANÇA: estas subscrições públicas (vouchers e clientes VIP) só devem trazer
             // campos não sensíveis. Ver recomendação de regras Firestore / Cloud Function no guia de publicação.
