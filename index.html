@@ -21,7 +21,7 @@
          mostrar sempre a versão antiga): compara a versão atual do código com a última vista neste dispositivo, e
          se forem diferentes, força uma atualização real, sem entrar em ciclo infinito. -->
     <script>
-        const VERSAO_APP = 'v2026-08-23-7';
+        const VERSAO_APP = 'v2026-08-24-3';
         try {
             if (sessionStorage.getItem('higilimp_versao') !== VERSAO_APP) {
                 sessionStorage.setItem('higilimp_versao', VERSAO_APP);
@@ -460,7 +460,23 @@
             </div>
         </div>
 
-        <div id="abaClientes" class="aba-admin hidden"><div class="bg-white rounded-2xl border mb-6 overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-[10px] uppercase font-bold"><tr><th class="p-4">VIP</th><th class="p-4">LTV</th><th class="p-4">Ações</th></tr></thead><tbody id="listaClientes"></tbody></table></div><div id="listaVouchersAtivos" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+        <div id="abaClientes" class="aba-admin hidden">
+            <div class="bg-white rounded-2xl border p-4 mb-4 space-y-3">
+                <div class="flex gap-2">
+                    <input type="text" id="pesquisaClientes" oninput="renderListaClientesAdmin()" placeholder="Pesquisar por nome ou telemóvel..." class="flex-grow p-2.5 border rounded-lg text-sm">
+                    <button onclick="document.getElementById('formNovoCliente').classList.toggle('hidden')" class="bg-blue-700 text-white font-bold text-xs px-4 rounded-lg whitespace-nowrap"><i class="fa-solid fa-plus"></i> Novo Cliente</button>
+                </div>
+                <div id="formNovoCliente" class="hidden border-t pt-3 space-y-2">
+                    <p class="text-[11px] text-slate-500">Para clientes antigos, ou marcados por telefone — sem precisar de passar pelo funil da app.</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="novoClienteNome" placeholder="Nome" class="p-2 border rounded text-sm">
+                        <input type="tel" id="novoClienteTel" placeholder="Telemóvel" class="p-2 border rounded text-sm">
+                    </div>
+                    <textarea id="novoClienteNotas" placeholder="Notas (opcional)" rows="2" class="w-full p-2 border rounded text-sm"></textarea>
+                    <button onclick="criarClienteManual()" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-lg text-sm">Guardar Cliente</button>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl border mb-6 overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-[10px] uppercase font-bold"><tr><th class="p-4">Cliente</th><th class="p-4">LTV</th><th class="p-4">Pagamentos</th><th class="p-4">Ações</th></tr></thead><tbody id="listaClientes"></tbody></table></div><div id="listaVouchersAtivos" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
             <div class="bg-white p-6 rounded-2xl border space-y-3 text-sm">
                 <h3 class="font-black border-b pb-2"><i class="fa-brands fa-whatsapp text-emerald-600"></i> Campanha WhatsApp para todos os clientes</h3>
                 <p class="text-[11px] text-slate-400">Escreve a mensagem (usa {nome} para personalizar). Depois clica em "Enviar" ao lado de cada cliente — abre o WhatsApp já com a mensagem pronta.</p>
@@ -475,7 +491,7 @@
             </div>
         </div>
 
-        <div id="modalHistorico" class="fixed inset-0 bg-slate-900/90 hidden items-center justify-center p-4 z-50"><div class="bg-white p-6 rounded-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto"><h3 class="font-black mb-4" id="tituloHistorico">Histórico</h3><div id="listaHistorico" class="space-y-2 text-xs"></div><button onclick="document.getElementById('modalHistorico').classList.add('hidden')" class="w-full mt-4 bg-slate-100 font-bold py-2.5 rounded-lg">Fechar</button></div></div>
+        <div id="modalHistorico" class="fixed inset-0 bg-slate-900/90 hidden items-center justify-center p-4 z-50"><div class="bg-white p-6 rounded-2xl w-full max-w-sm max-h-[80vh] overflow-y-auto"><h3 class="font-black mb-4" id="tituloHistorico">Histórico</h3><div id="listaHistorico" class="space-y-2 text-xs"></div><button id="btnAdicionarHistorico" class="w-full mt-4 bg-blue-50 text-blue-700 font-bold py-2.5 rounded-lg text-xs">+ Adicionar Serviço Antigo</button><button onclick="document.getElementById('modalHistorico').classList.add('hidden')" class="w-full mt-2 bg-slate-100 font-bold py-2.5 rounded-lg">Fechar</button></div></div>
         
         <div id="abaCatalogo" class="aba-admin hidden grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-white p-6 rounded-2xl border space-y-3 text-sm">
@@ -685,6 +701,36 @@
                 <h3 class="font-black p-4 border-b text-sm"><i class="fa-solid fa-circle-check text-emerald-500"></i> Pagos / Concluídos</h3>
                 <div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-[10px] uppercase font-bold"><tr><th class="p-3">Cliente</th><th class="p-3">Serviço</th><th class="p-3">Valor</th><th class="p-3">PDF</th></tr></thead><tbody id="listaPagamentosConcluidos"></tbody></table></div>
             </div>
+
+            <!-- Criar orçamento/recibo avulso, para qualquer cliente, mesmo sem lead associado -->
+            <div class="bg-white rounded-2xl border p-5">
+                <h3 class="font-black mb-1"><i class="fa-solid fa-file-invoice text-blue-600"></i> Criar Orçamento/Recibo Avulso</h3>
+                <p class="text-xs text-slate-500 mb-3">Para qualquer cliente, mesmo sem pedido feito pela app. Gera um PDF (não vale como fatura) pronto a enviar.</p>
+                <div class="space-y-2">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="avulsoCliente" placeholder="Nome do cliente" class="p-2 border rounded text-sm">
+                        <input type="tel" id="avulsoTel" placeholder="Telemóvel" class="p-2 border rounded text-sm">
+                    </div>
+                    <input type="text" id="avulsoServico" placeholder="Descrição do serviço" class="w-full p-2 border rounded text-sm">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" step="0.01" id="avulsoValor" placeholder="Valor (€)" class="p-2 border rounded text-sm">
+                        <select id="avulsoEstado" class="p-2 border rounded text-sm"><option value="Em Aberto">Em Aberto</option><option value="Pago">Pago</option></select>
+                    </div>
+                    <button onclick="gerarPDFAvulso()" class="w-full bg-blue-700 text-white font-bold py-2.5 rounded-lg text-sm">Gerar PDF</button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="enviarAvulsoWhatsApp()" class="bg-emerald-100 text-emerald-800 font-bold py-2 rounded-lg text-xs"><i class="fa-brands fa-whatsapp"></i> Enviar WhatsApp</button>
+                        <button onclick="enviarAvulsoEmail()" class="bg-slate-100 text-slate-700 font-bold py-2 rounded-lg text-xs"><i class="fa-solid fa-envelope"></i> Enviar Email</button>
+                    </div>
+                    <p class="text-[10px] text-slate-400">Gera sempre o PDF primeiro — o envio abre a mensagem já escrita, mas tens de anexar o PDF manualmente (guardado nas Transferências do telemóvel).</p>
+                </div>
+            </div>
+
+            <!-- Gestão mensal de condomínios: o ciclo "recibo do mês anterior + valor em aberto deste mês", automatizado -->
+            <div class="bg-white rounded-2xl border p-5">
+                <h3 class="font-black mb-1"><i class="fa-solid fa-building text-blue-600"></i> Condomínios — Gestão Mensal</h3>
+                <p class="text-xs text-slate-500 mb-3">Cada condomínio aparece aqui com o valor mensal. Todos os meses: marca o mês anterior como pago (gera o recibo) e envia o aviso do mês atual.</p>
+                <div id="listaCondominiosMensal" class="space-y-3"></div>
+            </div>
         </div>
 
         <div id="abaDisponibilidade" class="aba-admin hidden grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -805,6 +851,15 @@
         <button onclick="document.getElementById('modalRetencao').classList.add('hidden')" class="w-full bg-emerald-600 text-white font-black py-3.5 rounded-xl mb-2">Continuar e Aproveitar o Desconto</button>
         <button onclick="confirmarSaida()" class="w-full text-slate-400 text-xs py-2">Sair sem aproveitar</button>
     </div></div>
+
+    <!-- Cartaz de campanha, pronto a fazer print e publicar nas redes sociais, sem precisar de criar imagens à parte -->
+    <div id="modalCartazCampanha" class="fixed inset-0 bg-black hidden items-center justify-center z-50 overflow-y-auto">
+        <div class="w-full max-w-sm py-6 px-4">
+            <div id="cartazConteudo" class="bg-gradient-to-br from-blue-900 to-blue-700 rounded-2xl p-8 text-center text-white shadow-2xl" style="aspect-ratio: 4/5;"></div>
+            <p class="text-white text-center text-xs mt-4"><i class="fa-solid fa-camera"></i> Faça print deste ecrã para publicar</p>
+            <button onclick="document.getElementById('modalCartazCampanha').classList.add('hidden')" class="w-full mt-3 bg-white/10 text-white font-bold py-3 rounded-xl">Fechar</button>
+        </div>
+    </div>
 
     <div id="modalPin" class="fixed inset-0 bg-slate-900/90 hidden items-center justify-center p-4 z-50"><div class="bg-white p-8 rounded-2xl w-full max-w-sm text-center"><h3 class="font-black text-xl mb-4">Gestão Admin</h3><form onsubmit="event.preventDefault(); loginAdminEmail();" class="space-y-4 text-left"><div><label class="block text-xs font-bold mb-1">Email</label><input type="email" id="adminEmail" required class="w-full p-3 rounded-lg border"></div><div><label class="block text-xs font-bold mb-1">Password</label><input type="password" id="adminPass" required class="w-full p-3 rounded-lg border"></div><button type="submit" id="btnLogin" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold">Entrar</button></form><button onclick="recuperarPassword()" class="text-[11px] text-blue-600 underline mt-4 block mx-auto">Esqueci-me da password</button></div></div>
 
@@ -959,6 +1014,21 @@
             return leads.filter(l => l.cat === catNome && l.timestamp && new Date(l.timestamp.seconds ? l.timestamp.seconds*1000 : l.timestamp) >= limite).length;
         }
         function precoEfetivo(op) { return campanhaValida(op) ? op.precoCampanha : op.preco; }
+
+        // Gera um exemplo concreto (com medidas/tempo reais) mostrando os três níveis de preço lado a lado:
+        // tabela → normal → campanha. Usado tanto nos cartões da página inicial como no cartaz de partilha.
+        function gerarExemploUnidade(op, corTexto) {
+            if(op.tipoPreco !== 'm2' && op.tipoPreco !== 'hora') return '';
+            const cor = corTexto || 'text-slate-500';
+            let mult, exemploTxt;
+            if(op.tipoPreco === 'm2') { mult = 1.9 * 2.9; exemploTxt = `Exemplo: 1,9m × 2,9m = ${mult.toFixed(2)}m²`; }
+            else { mult = 2; exemploTxt = `Exemplo: 2 horas`; }
+            const vTab = (op.tab * mult).toFixed(2);
+            const vNormal = (op.preco * mult).toFixed(2);
+            const temCampanha = campanhaValida(op);
+            const vCampanha = temCampanha ? (op.precoCampanha * mult).toFixed(2) : null;
+            return `<div class="mt-2 pt-2 border-t border-current/10 text-[11px] ${cor}"><p class="font-bold mb-1">${exemploTxt}</p><p>Tabela: <s>${vTab}€</s> &nbsp;·&nbsp; Normal: ${vNormal}€${temCampanha?` &nbsp;·&nbsp; <strong class="text-red-600">Campanha: ${vCampanha}€</strong>`:''}</p></div>`;
+        }
 
         // ===== Suporte ao botão "Voltar" físico do telemóvel/browser =====
         // Cada ecrã principal (funil, admin) fica registado no histórico do browser via pushState,
@@ -1120,9 +1190,11 @@
                 // Prova social REAL (nunca inventada): conta reservas de facto feitas nesta categoria nos últimos 7 dias.
                 const reservasReais = contarReservasRecentes(catNome);
                 const socialHtml = reservasReais > 0 ? `<p class="text-[11px] font-bold text-emerald-600 mt-1"><i class="fa-solid fa-users"></i> ${reservasReais} pessoa(s) reservaram esta semana</p>` : '';
-                // Para preços por m² ou por hora, deixa sempre claro que o valor é POR UNIDADE, nunca o total do serviço.
+                // Para preços por m² ou por hora, deixa sempre claro que o valor é POR UNIDADE, nunca o total do serviço,
+                // e mostra um exemplo concreto com os três níveis de preço (tabela → normal → campanha).
                 const unidadeTxt = op.tipoPreco === 'm2' ? '/m²' : (op.tipoPreco === 'hora' ? '/hora' : '');
-                return `<button onclick="abrirFunilItem('${d_safeAttr(catKey)}', ${idx})" class="bg-white rounded-xl p-4 text-left shadow-lg hover:scale-[1.02] transition"><p class="text-[10px] font-bold uppercase text-slate-400">${escHtml(catNome)}</p><p class="text-sm font-black mb-1">${escHtml(op.nome)}</p><div class="flex items-baseline gap-2">${temRiscado?`<span class="text-xs text-slate-400 line-through">${op.preco.toFixed(2)}€${unidadeTxt}</span>`:''}<span class="text-xl font-black text-red-600">${op.tipoPreco==='orcamento'?'Sob consulta':precoMostrar.toFixed(2)+'€'+unidadeTxt}</span>${percent>0?`<span class="bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded">-${percent}%</span>`:''}</div>${unidadeTxt?`<p class="text-[10px] text-slate-400">Preço por unidade de medida — o valor final depende da área/tempo real.</p>`:''}${contadorHtml}${vagasHtml}${socialHtml}</button>`;
+                const exemploHtml = gerarExemploUnidade(op, 'text-slate-500');
+                return `<button onclick="abrirFunilItem('${d_safeAttr(catKey)}', ${idx})" class="bg-white rounded-xl p-4 text-left shadow-lg hover:scale-[1.02] transition"><p class="text-[10px] font-bold uppercase text-slate-400">${escHtml(catNome)}</p><p class="text-sm font-black mb-1">${escHtml(op.nome)}</p><div class="flex items-baseline gap-2">${temRiscado?`<span class="text-xs text-slate-400 line-through">${op.preco.toFixed(2)}€${unidadeTxt}</span>`:''}<span class="text-xl font-black text-red-600">${op.tipoPreco==='orcamento'?'Sob consulta':precoMostrar.toFixed(2)+'€'+unidadeTxt}</span>${percent>0?`<span class="bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded">-${percent}%</span>`:''}</div>${exemploHtml}${contadorHtml}${vagasHtml}${socialHtml}</button>`;
             }).join('');
 
             // Cartão de destaque no topo (logo visível, à entrada) — resume TODAS as categorias em campanha,
@@ -1721,7 +1793,7 @@
         }
 
         function carregarDadosAdmin() {
-            if(!db) return; renderAdminCat(); pedirPermissaoNotificacao(); preencherFormularioSite(); preencherFormularioDisponibilidade(); preencherFormularioPrecosCondominio(); renderListaFuncionarios(); renderListaCompromissosPessoais(); renderAgenda(); renderListaSubscritoresAdmin(); renderAbaCampanhas();
+            if(!db) return; renderAdminCat(); pedirPermissaoNotificacao(); preencherFormularioSite(); preencherFormularioDisponibilidade(); preencherFormularioPrecosCondominio(); renderListaFuncionarios(); renderListaCompromissosPessoais(); renderAgenda(); renderListaSubscritoresAdmin(); renderAbaCampanhas(); semearCondominiosIniciais();
             onSnapshot(collection(db, 'artifacts', __app_id, 'public', 'data', 'crm_leads'), (snap) => {
                 let leadsA = []; snap.forEach(d => leadsA.push({id: d.id, ...d.data()})); leadsA.sort((a,b) => (b.timestamp?.seconds||0) - (a.timestamp?.seconds||0));
                 if(!primeiraCargaLeads) { const idsNovos = leadsA.filter(l => !leadsAnteriores.has(l.id)); if(idsNovos.length > 0) tocarSomNovoLead(); }
@@ -1732,9 +1804,57 @@
 
             onSnapshot(collection(db, 'artifacts', __app_id, 'public', 'data', 'customers_vip'), (snap) => {
                 let clis = []; snap.forEach(d => clis.push({id:d.id, ...d.data()})); clis.sort((a,b) => b.valorTotal - a.valorTotal); window.memoriaClientesGlobal = clis;
-                document.getElementById('listaClientes').innerHTML = clis.map(c => `<tr><td class="p-4 font-bold">${escHtml(c.nome)}<br><span class="text-[10px]">${escHtml(c.tel)}</span>${c.codigoIndicacao?`<br><span class="text-[10px] text-blue-500 font-mono">${escHtml(c.codigoIndicacao)}</span>`:''}</td><td class="p-4 font-black text-emerald-600">${c.valorTotal.toFixed(2)}€<br><span class="text-[10px] text-slate-400 font-normal">${c.numServicos||0} serviços</span></td><td class="p-4 space-x-1"><button onclick="abrirModalVoucher('${d_safeAttr(c.tel)}', '${d_safeAttr(c.nome)}')" class="bg-amber-100 px-3 py-1 rounded text-xs font-bold">Voucher</button><button onclick="verHistorico('${d_safeAttr(c.id)}')" class="bg-slate-100 px-3 py-1 rounded text-xs font-bold">Histórico</button></td></tr>`).join('');
+                renderListaClientesAdmin();
                 renderListaCampanhaClientes();
             });
+        }
+
+        // Lista de clientes: mostra pagamentos pendentes reais (cruza com os leads do CRM pelo telemóvel),
+        // e permite pesquisar por nome/telemóvel.
+        window.renderListaClientesAdmin = () => {
+            const cont = document.getElementById('listaClientes'); if(!cont) return;
+            const termo = (document.getElementById('pesquisaClientes')?.value || '').trim().toLowerCase();
+            let clis = window.memoriaClientesGlobal || [];
+            if(termo) clis = clis.filter(c => (c.nome||'').toLowerCase().includes(termo) || (c.tel||'').includes(termo));
+            const leads = window.memoriaLeadsGlobal || [];
+            cont.innerHTML = clis.length ? clis.map(c => {
+                const telLimpo = (c.tel||'').replace(/\D/g,'');
+                const pendentes = leads.filter(l => (l.tel||'').replace(/\D/g,'') === telLimpo && l.estado !== 'Pago/Concluído' && l.estado !== 'Cancelado' && !l.isOrcamento);
+                const pagamentosHtml = pendentes.length ? `<span class="text-amber-600 font-bold text-[11px]"><i class="fa-solid fa-clock"></i> ${pendentes.length} pendente(s)</span>` : `<span class="text-emerald-600 font-bold text-[11px]"><i class="fa-solid fa-check"></i> Em dia</span>`;
+                return `<tr><td class="p-4 font-bold">${escHtml(c.nome)}<br><span class="text-[10px]">${escHtml(c.tel)}</span>${c.codigoIndicacao?`<br><span class="text-[10px] text-blue-500 font-mono">${escHtml(c.codigoIndicacao)}</span>`:''}</td><td class="p-4 font-black text-emerald-600">${(c.valorTotal||0).toFixed(2)}€<br><span class="text-[10px] text-slate-400 font-normal">${c.numServicos||0} serviços</span></td><td class="p-4">${pagamentosHtml}</td><td class="p-4 space-x-1"><button onclick="abrirModalVoucher('${d_safeAttr(c.tel)}', '${d_safeAttr(c.nome)}')" class="bg-amber-100 px-3 py-1 rounded text-xs font-bold">Voucher</button><button onclick="verHistorico('${d_safeAttr(c.id)}')" class="bg-slate-100 px-3 py-1 rounded text-xs font-bold">Histórico</button></td></tr>`;
+            }).join('') : '<tr><td colspan="4" class="p-4 text-center text-xs text-slate-400">Nenhum cliente encontrado.</td></tr>';
+        }
+
+        // Criar cliente manualmente — para clientes antigos ou marcados por telefone, sem precisar de passar pelo funil.
+        window.criarClienteManual = async () => {
+            const nome = document.getElementById('novoClienteNome').value.trim();
+            const tel = document.getElementById('novoClienteTel').value.trim();
+            const notas = document.getElementById('novoClienteNotas').value.trim();
+            if(!nome || !tel) return alert('Preencha nome e telemóvel.');
+            if(!db) return;
+            const cid = tel.replace(/\D/g,''); if(!cid) return alert('Telemóvel inválido.');
+            const cRef = doc(db, 'artifacts', __app_id, 'public', 'data', 'customers_vip', cid);
+            const cDoc = await getDoc(cRef);
+            if(cDoc.exists()) return alert('Já existe um cliente com este telemóvel.');
+            const codigoIndicacao = 'REF-' + Math.random().toString(36).substring(2,6).toUpperCase();
+            try {
+                await setDoc(cRef, { nome, tel, numServicos: 0, valorTotal: 0, historico: [], notas, codigoIndicacao, desde: serverTimestamp ? serverTimestamp() : new Date() });
+                alert('Cliente criado!');
+                document.getElementById('novoClienteNome').value=''; document.getElementById('novoClienteTel').value=''; document.getElementById('novoClienteNotas').value='';
+                document.getElementById('formNovoCliente').classList.add('hidden');
+            } catch(err) { alert('Erro ao criar: ' + err.message); }
+        }
+
+        // Adicionar um serviço antigo ao histórico de um cliente (para quando ele já tinha histórico antes da app existir).
+        window.adicionarServicoHistorico = async (custId) => {
+            const artigo = prompt('Descrição do serviço (ex: "Sofá 3 lugares"):'); if(!artigo) return;
+            const valorTxt = prompt('Valor cobrado (€):'); const valor = parseFloat(valorTxt); if(!valor || valor <= 0) return alert('Valor inválido.');
+            if(!db) return;
+            const cRef = doc(db, 'artifacts', __app_id, 'public', 'data', 'customers_vip', custId);
+            const cDoc = await getDoc(cRef); if(!cDoc.exists()) return;
+            const entrada = { artigo, valor, data: new Date().toLocaleDateString('pt-PT') };
+            await updateDoc(cRef, { numServicos: (cDoc.data().numServicos||0) + 1, valorTotal: (cDoc.data().valorTotal||0) + valor, historico: arrayUnion(entrada) });
+            setTimeout(() => verHistorico(custId), 400);
         }
 
         function renderStatsCRM(leadsA) {
@@ -1816,6 +1936,142 @@
             cont1.innerHTML = emAberto.length ? emAberto.map(l => `<tr class="border-b"><td class="p-3 text-xs font-bold">${escHtml(l.nome)}<br><span class="font-mono text-[10px] text-slate-400">${escHtml(l.tel)}</span></td><td class="p-3 text-xs">${escHtml(l.artigo)}</td><td class="p-3 text-xs font-bold text-amber-600">${(l.valor||0).toFixed(2)}€</td><td class="p-3 text-[10px]">${escHtml(l.estado)}</td><td class="p-3"><button onclick="gerarComprovativoPDF('${d_safeId(l.id)}')" class="text-blue-600 text-[11px] font-bold"><i class="fa-solid fa-file-pdf"></i> PDF</button></td></tr>`).join('') : '<tr><td colspan="5" class="p-3 text-center text-xs text-slate-400">Sem pagamentos em aberto.</td></tr>';
 
             document.getElementById('listaPagamentosConcluidos').innerHTML = concluidos.length ? concluidos.map(l => `<tr class="border-b"><td class="p-3 text-xs font-bold">${escHtml(l.nome)}</td><td class="p-3 text-xs">${escHtml(l.artigo)}</td><td class="p-3 text-xs font-bold text-emerald-600">${(l.valor||0).toFixed(2)}€</td><td class="p-3"><button onclick="gerarComprovativoPDF('${d_safeId(l.id)}')" class="text-blue-600 text-[11px] font-bold"><i class="fa-solid fa-file-pdf"></i> PDF</button></td></tr>`).join('') : '<tr><td colspan="4" class="p-3 text-center text-xs text-slate-400">Ainda sem pagamentos concluídos.</td></tr>';
+            renderCondominiosMensal();
+        }
+
+        // Função partilhada de desenho do PDF — usada pelo comprovativo de leads, pelo orçamento avulso, e pelos recibos mensais de condomínio.
+        function desenharComprovativoPDF({titulo, estado, cliente, tel, local, servico, dataTxt, valor, nif}) {
+            const { jsPDF } = window.jspdf;
+            const docPdf = new jsPDF();
+            const pago = estado === 'Pago' || estado === 'Pago/Concluído';
+            const empresa = siteContent.nomeEmpresa || 'Higilimp Services';
+            docPdf.setFontSize(18); docPdf.setFont(undefined, 'bold'); docPdf.text(empresa, 20, 25);
+            docPdf.setFontSize(10); docPdf.setFont(undefined, 'normal'); docPdf.text(titulo || 'Comprovativo de Serviço', 20, 32);
+            docPdf.setDrawColor(200); docPdf.line(20, 38, 190, 38);
+            docPdf.setFontSize(11); docPdf.setFont(undefined, 'bold'); docPdf.setTextColor(0,0,0); docPdf.text(pago ? 'ESTADO: PAGO' : 'ESTADO: EM ABERTO', 20, 48);
+            docPdf.setFont(undefined, 'normal'); docPdf.setFontSize(10);
+            let y = 60;
+            const linha = (label, v) => { docPdf.setFont(undefined, 'bold'); docPdf.text(label, 20, y); docPdf.setFont(undefined, 'normal'); docPdf.text(String(v||'-'), 70, y); y += 8; };
+            linha('Cliente:', cliente); if(nif) linha('NIF:', nif); if(tel) linha('Telemóvel:', tel); if(local) linha('Localidade:', local);
+            linha('Serviço:', servico); linha('Referente a:', dataTxt);
+            y += 4; docPdf.line(20, y, 190, y); y += 10;
+            docPdf.setFontSize(14); docPdf.setFont(undefined, 'bold'); docPdf.setTextColor(0,0,0); docPdf.text(`TOTAL: ${valor.toFixed(2)}€`, 20, y); y += 12;
+            docPdf.setFillColor(255, 243, 205); docPdf.rect(20, y, 170, 26, 'F');
+            docPdf.setFontSize(8.5); docPdf.setFont(undefined, 'bold'); docPdf.setTextColor(120, 90, 0);
+            docPdf.text('AVISO: este documento é um comprovativo interno de serviço/pagamento e NÃO substitui', 24, y + 6);
+            docPdf.text('nem serve como fatura fiscal. Para efeitos fiscais, solicite a fatura correspondente.', 24, y + 11);
+            docPdf.setFont(undefined, 'normal');
+            docPdf.text('Caso não seja solicitada fatura, o valor apresentado não inclui IVA. Se pretender fatura', 24, y + 17);
+            docPdf.text('com IVA discriminado, solicite-a antes da prestação do serviço.', 24, y + 22);
+            y += 34;
+            docPdf.setFontSize(8); docPdf.setFont(undefined, 'normal'); docPdf.setTextColor(120);
+            docPdf.text(`Documento gerado em ${new Date().toLocaleString('pt-PT')} — ${empresa}`, 20, y);
+            return docPdf;
+        }
+
+        // ===== Orçamento/Recibo avulso: para qualquer cliente, mesmo sem lead na app =====
+        window.gerarPDFAvulso = () => {
+            const cliente = document.getElementById('avulsoCliente').value.trim();
+            const tel = document.getElementById('avulsoTel').value.trim();
+            const servico = document.getElementById('avulsoServico').value.trim();
+            const valor = parseFloat(document.getElementById('avulsoValor').value);
+            const estado = document.getElementById('avulsoEstado').value;
+            if(!cliente || !servico || !valor) return alert('Preencha cliente, serviço e valor.');
+            if(!window.jspdf) return alert('Biblioteca de PDF ainda a carregar, tente novamente em breve.');
+            const docPdf = desenharComprovativoPDF({ titulo: 'Orçamento/Comprovativo', estado, cliente, tel, servico, dataTxt: new Date().toLocaleDateString('pt-PT'), valor });
+            docPdf.save(`${estado==='Pago'?'Recibo':'Orcamento'}_${cliente.replace(/\s+/g,'_')}.pdf`);
+        }
+        window.enviarAvulsoWhatsApp = () => {
+            const cliente = document.getElementById('avulsoCliente').value.trim(); const tel = document.getElementById('avulsoTel').value.trim().replace(/\D/g,'');
+            const servico = document.getElementById('avulsoServico').value.trim(); const valor = parseFloat(document.getElementById('avulsoValor').value) || 0;
+            const estado = document.getElementById('avulsoEstado').value;
+            if(!tel) return alert('Indique o telemóvel do cliente.');
+            const msg = `Olá ${cliente}! Envio o ${estado==='Pago'?'comprovativo':'orçamento'} referente a: ${servico} — ${valor.toFixed(2)}€ (${estado}). Segue em anexo o documento (não substitui fatura fiscal).`;
+            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+        window.enviarAvulsoEmail = () => {
+            const cliente = document.getElementById('avulsoCliente').value.trim();
+            const servico = document.getElementById('avulsoServico').value.trim(); const valor = parseFloat(document.getElementById('avulsoValor').value) || 0;
+            const estado = document.getElementById('avulsoEstado').value;
+            const msg = `Olá ${cliente},\n\nEnvio o ${estado==='Pago'?'comprovativo':'orçamento'} referente a: ${servico} — ${valor.toFixed(2)}€ (${estado}).\nSegue em anexo o documento (não substitui fatura fiscal).\n\nCumprimentos,\n${siteContent.nomeEmpresa || 'Higilimp Services'}`;
+            window.location.href = `mailto:?subject=${encodeURIComponent((estado==='Pago'?'Comprovativo':'Orçamento') + ' - ' + cliente)}&body=${encodeURIComponent(msg)}`;
+        }
+
+        // ===== Condomínios — Gestão Mensal =====
+        // Ciclo automatizado: cada condomínio guarda um histórico mensal {mes, pago}. Todos os meses, marca o mês
+        // anterior como pago (gera logo o recibo) e envia o aviso do valor em aberto do mês atual.
+        function mesAtualStr() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+        function mesAnteriorStr() { const d = new Date(); d.setMonth(d.getMonth()-1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+        function nomeMes(mesStr) { const [a,m] = mesStr.split('-'); return new Date(a, m-1, 1).toLocaleDateString('pt-PT', {month:'long', year:'numeric'}); }
+
+        function renderCondominiosMensal() {
+            const cont = document.getElementById('listaCondominiosMensal'); if(!cont) return;
+            const condos = (window.memoriaLeadsGlobal||[]).filter(l => l.isCondominio);
+            if(condos.length === 0) { cont.innerHTML = '<p class="text-xs text-slate-400">Sem condomínios registados ainda.</p>'; return; }
+            const mesAtual = mesAtualStr(); const mesAnt = mesAnteriorStr();
+            cont.innerHTML = condos.map(c => {
+                const hist = c.historicoMensalCondo || [];
+                const anteriorPago = hist.some(h => h.mes === mesAnt && h.pago);
+                const atualPago = hist.some(h => h.mes === mesAtual && h.pago);
+                return `<div class="border rounded-xl p-3 text-xs ${atualPago?'bg-emerald-50':'bg-amber-50'}">
+                    <p class="font-bold">${escHtml(c.nome)} <span class="text-slate-400 font-normal">— ${escHtml(c.local||'')}</span></p>
+                    ${c.nif?`<p class="text-slate-400">NIF: ${escHtml(c.nif)}${c.agenciaGestao?` · Gestão: ${escHtml(c.agenciaGestao)}`:''}</p>`:''}
+                    <div class="flex items-center gap-2 my-1.5"><span class="text-slate-500">Mensalidade:</span><input type="number" step="0.01" value="${(c.valor||0).toFixed(2)}" onchange="editarValorMensalCondo('${d_safeId(c.id)}', this.value)" class="w-20 p-1 border rounded font-bold"><span class="text-slate-400">€ (edite se mudar sazonalmente)</span></div>
+                    <p class="text-slate-500 mb-2">${nomeMes(mesAnt)}: ${anteriorPago?'<span class="text-emerald-600 font-bold">✓ Pago</span>':'<span class="text-red-500 font-bold">Por pagar</span>'} · ${nomeMes(mesAtual)}: ${atualPago?'<span class="text-emerald-600 font-bold">✓ Pago</span>':'<span class="text-amber-600 font-bold">Em aberto</span>'}</p>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="marcarMesCondoPago('${d_safeId(c.id)}','${mesAnt}')" class="bg-white border text-[11px] font-bold px-2.5 py-1.5 rounded">Marcar ${nomeMes(mesAnt)} como pago + Recibo</button>
+                        <button onclick="enviarAvisoCondoWhatsApp('${d_safeId(c.id)}')" class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1.5 rounded"><i class="fa-brands fa-whatsapp"></i> Enviar Aviso Mês Atual</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.editarValorMensalCondo = async (leadId, valor) => {
+            const v = parseFloat(valor); if(!v || v <= 0 || !db) return;
+            try { await updateDoc(doc(db, 'artifacts', __app_id, 'public', 'data', 'crm_leads', leadId), { valor: v }); }
+            catch(e) { alert('Erro ao atualizar valor.'); }
+        }
+
+        // Cria automaticamente, uma única vez, os 3 condomínios reais indicados pela Hikari — para que já apareçam
+        // prontos na Gestão Mensal sem ela ter de os introduzir manualmente à mão.
+        async function semearCondominiosIniciais() {
+            if(!db) return;
+            const flagRef = doc(db, 'artifacts', __app_id, 'public', 'data', 'settings', 'seed_condominios_v1');
+            const flagDoc = await getDoc(flagRef);
+            if(flagDoc.exists()) return; // já foi feito antes, não repete
+            const condosIniciais = [
+                { nome: 'Edifício Residencial de Gondar', local: 'Rua Monte de Cima nº 79/101, lote 17, 4835-537 Gondar, Guimarães', nif: '90227646', agenciaGestao: '', valor: 150, tel: '', notas: 'Cliente privado (sem agência). Fatura sempre igual, exceto se houver serviço/produto extra.' },
+                { nome: 'Edifício Essência Natura', local: 'Rua da Torre Joane, 4770-271 Guimarães', nif: '902188194', agenciaGestao: 'Servigrupo', valor: 75, tel: '', notas: 'Normalmente 2 visitas/mês (75€). No verão passa a semanal — Agosto já fica 150€. Por vezes serviço extra de limpeza de vidros.' },
+                { nome: 'Edifício São Torcato', local: '', nif: '902009370', agenciaGestao: 'Servigrupo', valor: 150, tel: '', notas: 'Valor fixo 150€/mês, 1 visita/semana.' }
+            ];
+            for(const c of condosIniciais) {
+                await addDoc(collection(db, 'artifacts', __app_id, 'public', 'data', 'crm_leads'), {
+                    nome: c.nome, tel: c.tel, local: c.local, cat: 'Condomínio (B2B)', artigo: 'Limpeza de condomínio', valor: c.valor,
+                    isOrcamento: false, isCondominio: true, nif: c.nif, agenciaGestao: c.agenciaGestao, notas: c.notas,
+                    estado: 'Agendado', dataAgendamento: '', historicoMensalCondo: [], timestamp: serverTimestamp ? serverTimestamp() : new Date()
+                });
+            }
+            await setDoc(flagRef, { criadoEm: serverTimestamp ? serverTimestamp() : new Date() });
+        }
+
+        window.marcarMesCondoPago = async (leadId, mes) => {
+            if(!db) return;
+            const c = (window.memoriaLeadsGlobal||[]).find(x => x.id === leadId); if(!c) return;
+            const entrada = { mes, pago: true, dataPagamento: new Date().toISOString() };
+            try {
+                await updateDoc(doc(db, 'artifacts', __app_id, 'public', 'data', 'crm_leads', leadId), { historicoMensalCondo: arrayUnion(entrada) });
+                if(!window.jspdf) return alert('Marcado como pago! (Biblioteca de PDF ainda a carregar para o recibo — tente gerar de novo em breve.)');
+                const docPdf = desenharComprovativoPDF({ titulo: 'Recibo Mensal — Condomínio', estado: 'Pago', cliente: c.nome, tel: c.tel, local: c.local, servico: 'Limpeza de condomínio', dataTxt: nomeMes(mes), valor: c.valor||0, nif: c.nif });
+                docPdf.save(`Recibo_Condominio_${c.nome.replace(/\s+/g,'_')}_${mes}.pdf`);
+            } catch(e) { alert('Erro ao marcar como pago.'); }
+        }
+        window.enviarAvisoCondoWhatsApp = (leadId) => {
+            const c = (window.memoriaLeadsGlobal||[]).find(x => x.id === leadId); if(!c) return;
+            const tel = (c.tel||'').replace(/\D/g,''); if(!tel) return alert('Sem telemóvel guardado para este condomínio.');
+            const mesAtual = mesAtualStr(); const mesAnt = mesAnteriorStr();
+            const hist = c.historicoMensalCondo || []; const anteriorPago = hist.some(h => h.mes === mesAnt && h.pago);
+            const msg = `Olá! Aqui vai a atualização da conta do condomínio "${c.nome}":\n\n${anteriorPago?`✅ ${nomeMes(mesAnt)}: pago, obrigado.`:`⚠️ ${nomeMes(mesAnt)}: ainda por pagar.`}\n📌 Valor em aberto de ${nomeMes(mesAtual)}: *${(c.valor||0).toFixed(2)}€*\n\nPagamento até ao dia 5, disponível na conta até ao dia 6 (transferência, MB Way ou numerário). Obrigado!`;
+            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         window.gerarComprovativoPDF = (leadId) => {
@@ -2069,6 +2325,7 @@
             document.getElementById('tituloHistorico').textContent = `Histórico — ${c.nome}`;
             const hist = c.historico || [];
             document.getElementById('listaHistorico').innerHTML = hist.length ? hist.slice().reverse().map(h => `<div class="border-b pb-2"><p class="font-bold">${escHtml(h.artigo||'')}</p><p class="text-slate-400">${h.data||''} · ${(h.valor||0).toFixed(2)}€</p></div>`).join('') : '<p class="text-slate-400">Sem registos anteriores.</p>';
+            document.getElementById('btnAdicionarHistorico').onclick = () => { adicionarServicoHistorico(custId); };
             document.getElementById('modalHistorico').classList.remove('hidden'); document.getElementById('modalHistorico').classList.add('flex');
         }
 
@@ -2298,6 +2555,40 @@
             await editarCampoCatalogo(catKey, idx, 'campanhaAtiva', false);
             renderAbaCampanhas();
         }
+        // Gera um "cartaz" pronto a fazer print, com os dados reais da campanha — logótipo, preços, desconto e validade.
+        window.abrirCartazCampanha = (catKey, idx) => {
+            const cat = catalogoCompleto[catKey]; const op = cat.opcoes[idx]; if(!op) return;
+            const unidadeTxt = op.tipoPreco === 'm2' ? '/m²' : (op.tipoPreco === 'hora' ? '/hora' : '');
+            const percent = op.preco > 0 && op.precoCampanha > 0 && op.precoCampanha < op.preco ? Math.round(((op.preco - op.precoCampanha)/op.preco)*100) : 0;
+            const vagas = vagasRestantes(op);
+            const validadeTxt = op.campanhaValidade ? `Até ${new Date(op.campanhaValidade).toLocaleDateString('pt-PT', {day:'2-digit', month:'long'})}` : 'Por tempo limitado';
+            const logoHtml = siteContent.logoURL ? `<img src="${escHtml(siteContent.logoURL)}" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover border-2 border-white">` : `<div class="w-16 h-16 rounded-full bg-white text-blue-900 font-black text-2xl flex items-center justify-center mx-auto mb-3">H</div>`;
+            document.getElementById('cartazConteudo').innerHTML = `
+                <div class="flex flex-col justify-between h-full">
+                    <div>
+                        ${logoHtml}
+                        <p class="text-xs font-bold text-blue-200 uppercase tracking-widest">${escHtml(siteContent.nomeEmpresa || 'Higilimp Services')}</p>
+                    </div>
+                    <div>
+                        <span class="inline-block bg-red-600 text-white text-xs font-black uppercase px-4 py-1.5 rounded-full mb-4">🔥 Promoção${percent>0?` -${percent}%`:''}</span>
+                        <p class="text-sm font-bold text-blue-200 uppercase mb-1">${escHtml(cat.nome)}</p>
+                        <p class="text-xl font-black mb-4">${escHtml(op.nome)}</p>
+                        <div class="flex items-center justify-center gap-3 mb-2">
+                            ${percent>0?`<span class="text-lg text-blue-300 line-through">${op.preco.toFixed(2)}€${unidadeTxt}</span>`:''}
+                            <span class="text-4xl font-black text-amber-400">${op.precoCampanha.toFixed(2)}€${unidadeTxt}</span>
+                        </div>
+                        ${gerarExemploUnidade(op, 'text-blue-200')}
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-amber-400">${escHtml(validadeTxt)}</p>
+                        ${vagas!==null?`<p class="text-xs text-blue-200">Só ${vagas} vaga(s) disponível(eis)</p>`:''}
+                        <p class="text-xs text-blue-200 mt-2">📞 ${escHtml(siteContent.whatsappNumero || '351928122918')}</p>
+                    </div>
+                </div>`;
+            document.getElementById('modalCartazCampanha').classList.remove('hidden');
+            document.getElementById('modalCartazCampanha').classList.add('flex');
+        }
+
         function renderAbaCampanhas() {
             preencherCategoriasCampanha();
             const cont = document.getElementById('listaCampanhasAtivas'); if(!cont) return;
@@ -2309,7 +2600,9 @@
                 const vagas = vagasRestantes(op);
                 const semVagas = vagas !== null && vagas <= 0;
                 const inativa = expirada || semVagas;
-                return `<div class="flex justify-between items-center border rounded-lg p-3 text-xs ${inativa?'bg-slate-100 opacity-60':'bg-red-50'}"><div><p class="font-bold">${escHtml(catNome)} — ${escHtml(op.nome)}</p><p class="text-slate-500">${op.preco.toFixed(2)}€ → <strong class="text-red-600">${op.precoCampanha.toFixed(2)}€</strong>${op.campanhaValidade?` · até ${new Date(op.campanhaValidade).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:''}${vagas!==null?` · ${vagas} vaga(s) restante(s)`:''}${inativa?' · <strong>TERMINADA</strong>':''}</p></div><button onclick="desativarCampanhaRapida('${d_safeAttr(catKey)}',${idx})" class="text-red-500 font-bold">Desativar</button></div>`;
+                // Deixa sempre claro quando o preço é por m² ou por hora, nunca o total, também aqui no admin.
+                const unidadeTxt = op.tipoPreco === 'm2' ? '/m²' : (op.tipoPreco === 'hora' ? '/hora' : '');
+                return `<div class="flex justify-between items-center border rounded-lg p-3 text-xs ${inativa?'bg-slate-100 opacity-60':'bg-red-50'}"><div><p class="font-bold">${escHtml(catNome)} — ${escHtml(op.nome)}</p><p class="text-slate-500">${op.preco.toFixed(2)}€${unidadeTxt} → <strong class="text-red-600">${op.precoCampanha.toFixed(2)}€${unidadeTxt}</strong>${op.campanhaValidade?` · até ${new Date(op.campanhaValidade).toLocaleString('pt-PT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:''}${vagas!==null?` · ${vagas} vaga(s) restante(s)`:''}${inativa?' · <strong>TERMINADA</strong>':''}</p></div><div class="flex gap-2 flex-shrink-0"><button onclick="abrirCartazCampanha('${d_safeAttr(catKey)}',${idx})" class="text-blue-600 font-bold" title="Ver cartaz para partilhar"><i class="fa-solid fa-image"></i></button><button onclick="desativarCampanhaRapida('${d_safeAttr(catKey)}',${idx})" class="text-red-500 font-bold">Desativar</button></div></div>`;
             }).join('');
             renderDuvidasAssistente();
         }
