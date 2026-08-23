@@ -21,7 +21,7 @@
          mostrar sempre a versão antiga): compara a versão atual do código com a última vista neste dispositivo, e
          se forem diferentes, força uma atualização real, sem entrar em ciclo infinito. -->
     <script>
-        const VERSAO_APP = 'v2026-08-24-4';
+        const VERSAO_APP = 'v2026-08-24-5';
         try {
             if (sessionStorage.getItem('higilimp_versao') !== VERSAO_APP) {
                 sessionStorage.setItem('higilimp_versao', VERSAO_APP);
@@ -505,28 +505,8 @@
                 </div>
                 <input type="text" id="catTag" placeholder="Etiqueta Urgência" class="w-full p-2 border rounded">
                 <div><label class="text-[10px] font-bold text-slate-500">Duração estimada do serviço (min)</label><input type="number" id="catDuracaoMin" placeholder="60" value="60" class="w-full p-2 border rounded"></div>
-                <div class="bg-red-50 border border-red-200 rounded p-2 space-y-2">
-                    <label class="text-[10px] font-bold text-red-700 uppercase">🔥 Campanha/Relâmpago (opcional)</label>
-                    <p class="text-[10px] text-slate-500">O desconto é sempre calculado sobre o <strong>Preço de Tabela</strong> (campo "Tab" acima), nunca sobre o preço normal.</p>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500">Tipo de desconto</label>
-                        <div class="flex gap-2">
-                            <label class="flex-1 flex items-center justify-center gap-1.5 border rounded p-2 text-xs font-bold cursor-pointer has-[:checked]:bg-red-600 has-[:checked]:text-white"><input type="radio" name="catTipoDesconto" value="percent" checked onchange="calcularPrecoCampanhaPorPercent()" class="hidden">%</label>
-                            <label class="flex-1 flex items-center justify-center gap-1.5 border rounded p-2 text-xs font-bold cursor-pointer has-[:checked]:bg-red-600 has-[:checked]:text-white"><input type="radio" name="catTipoDesconto" value="euro" onchange="calcularPrecoCampanhaPorPercent()" class="hidden">€ de desconto</label>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500" id="labelDescontoPercent">Valor do desconto — calcula o preço final automaticamente</label>
-                        <input type="number" step="0.01" min="0" id="catDescontoPercent" placeholder="Ex: 20" oninput="calcularPrecoCampanhaPorPercent()" class="w-full p-2 border rounded">
-                    </div>
-                    <p id="previewDescontoCampanha" class="text-[11px] font-bold text-slate-500 hidden"></p>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500">Preço final de campanha (€, s/IVA) — calculado automaticamente, ou edite à mão</label>
-                        <input type="number" step="0.01" id="catPrecoCampanha" placeholder="Deixe em branco se não houver" readonly class="w-full p-2 border rounded bg-slate-100">
-                    </div>
-                    <label class="flex items-center gap-2 text-[11px] font-bold mt-1"><input type="checkbox" id="catCampanhaAtiva"> Campanha ativa agora (usa este preço em vez do normal)</label>
-                    <label class="text-[10px] font-bold text-slate-500 block mt-1">Válida até (opcional — aparece com contagem decrescente)</label>
-                    <input type="datetime-local" id="catCampanhaValidade" class="w-full p-2 border rounded">
+                <div class="bg-blue-50 border border-blue-200 rounded p-3 text-center">
+                    <p class="text-xs text-blue-900"><i class="fa-solid fa-circle-info"></i> Para colocar este serviço em campanha/promoção relâmpago, cria-o primeiro aqui, e depois vai à aba <button type="button" onclick="mudarTab('Campanhas')" class="font-black underline">🔥 Campanhas</button> para escolheres o desconto — lá tens acesso a todos os serviços já criados, e os cálculos são automáticos.</p>
                 </div>
                 <div>
                     <label class="text-[10px] font-bold text-slate-500">Modalidade do serviço (aplica-se à categoria toda)</label>
@@ -2389,21 +2369,7 @@
             document.getElementById('previewIvaPreco').textContent = preco > 0 ? `${(preco*1.23).toFixed(2)}€ c/IVA` : '';
         }
 
-        window.calcularPrecoCampanhaPorPercent = () => {
-            const tab = parseFloat(document.getElementById('catTab').value) || 0;
-            const valor = parseFloat(document.getElementById('catDescontoPercent').value) || 0;
-            const tipo = document.querySelector('input[name="catTipoDesconto"]:checked')?.value || 'percent';
-            document.getElementById('labelDescontoPercent').textContent = tipo === 'euro' ? 'Valor do desconto em € — calcula o preço final automaticamente' : 'Desconto em % — calcula o preço final automaticamente';
-            const preview = document.getElementById('previewDescontoCampanha');
-            if(tab <= 0 || valor <= 0) { preview.classList.add('hidden'); document.getElementById('catPrecoCampanha').value = ''; return; }
-            const precoNovo = calcularPrecoComDesconto(tab, tipo, valor);
-            document.getElementById('catPrecoCampanha').value = precoNovo.toFixed(2);
-            const percentReal = tab > 0 ? Math.round(((tab - precoNovo)/tab)*100) : 0;
-            preview.textContent = `De ${tab.toFixed(2)}€ (tabela) por ${precoNovo.toFixed(2)}€ (-${percentReal}%)`;
-            preview.classList.remove('hidden');
-        }
-
-        window.adicionarAoCatalogo = async () => { const cN=document.getElementById('catCat').value.trim(); const aN=document.getElementById('catNome').value.trim(); const pt=parseFloat(document.getElementById('catTab').value)||0; const pc=parseFloat(document.getElementById('catPreco').value)||0; const tp=document.getElementById('catTipoPreco').value; const imgURL=document.getElementById('catImagemURL').value.trim(); const duracaoMin=parseInt(document.getElementById('catDuracaoMin').value)||60; const precoCampanha=parseFloat(document.getElementById('catPrecoCampanha').value)||0; const campanhaAtiva=document.getElementById('catCampanhaAtiva').checked; const campanhaValidade=document.getElementById('catCampanhaValidade').value; const modalidade=document.getElementById('catModalidade').value; const ehCampanha=document.getElementById('catEhCampanha').checked; if(!cN||!aN) return alert("Preencha Categoria e Nome."); const cI=cN.toLowerCase().replace(/[^a-z0-9]/g,''); let nC=JSON.parse(JSON.stringify(catalogoCompleto)); const categoriaNova = !nC[cI]; if(!nC[cI]) nC[cI]={id:cI,icone:'fa-bolt',nome:cN,opcoes:[]}; if(imgURL) nC[cI].imagemURL = imgURL; nC[cI].modalidade = modalidade; if(categoriaNova || ehCampanha) nC[cI].categoriaCampanha = ehCampanha; nC[cI].opcoes.push({ id:Date.now().toString(), nome:aN, tab:pt, preco:pc, etiqueta:document.getElementById('catTag').value.trim(), tipoPreco: tp, duracaoMin: duracaoMin, precoCampanha: precoCampanha, campanhaAtiva: campanhaAtiva, campanhaValidade: campanhaValidade }); if(db){try{await setDoc(doc(db,'artifacts',__app_id,'public','data','settings','catalog_master'),nC); renderPromocoesRelampago(); renderGridServicosHome(); alert("Adicionado!"); document.getElementById('catImagemURL').value=''; document.getElementById('catPrecoCampanha').value=''; document.getElementById('catDescontoPercent').value=''; document.getElementById('previewDescontoCampanha').classList.add('hidden'); document.getElementById('catCampanhaAtiva').checked=false; document.getElementById('catCampanhaValidade').value=''; document.getElementById('previewIvaTab').textContent=''; document.getElementById('previewIvaPreco').textContent='';}catch(err){alert('Erro ao guardar: ' + (err.code==='permission-denied' ? 'sem permissão — o email desta conta não coincide com as regras do Firestore.' : err.message));}} }
+        window.adicionarAoCatalogo = async () => { const cN=document.getElementById('catCat').value.trim(); const aN=document.getElementById('catNome').value.trim(); const pt=parseFloat(document.getElementById('catTab').value)||0; const pc=parseFloat(document.getElementById('catPreco').value)||0; const tp=document.getElementById('catTipoPreco').value; const imgURL=document.getElementById('catImagemURL').value.trim(); const duracaoMin=parseInt(document.getElementById('catDuracaoMin').value)||60; const modalidade=document.getElementById('catModalidade').value; const ehCampanha=document.getElementById('catEhCampanha').checked; if(!cN||!aN) return alert("Preencha Categoria e Nome."); const cI=cN.toLowerCase().replace(/[^a-z0-9]/g,''); let nC=JSON.parse(JSON.stringify(catalogoCompleto)); const categoriaNova = !nC[cI]; if(!nC[cI]) nC[cI]={id:cI,icone:'fa-bolt',nome:cN,opcoes:[]}; if(imgURL) nC[cI].imagemURL = imgURL; nC[cI].modalidade = modalidade; if(categoriaNova || ehCampanha) nC[cI].categoriaCampanha = ehCampanha; nC[cI].opcoes.push({ id:Date.now().toString(), nome:aN, tab:pt, preco:pc, etiqueta:document.getElementById('catTag').value.trim(), tipoPreco: tp, duracaoMin: duracaoMin, precoCampanha: 0, campanhaAtiva: false, campanhaValidade: '' }); if(db){try{await setDoc(doc(db,'artifacts',__app_id,'public','data','settings','catalog_master'),nC); renderPromocoesRelampago(); renderGridServicosHome(); alert("Adicionado! Para colocar em campanha, vai à aba 🔥 Campanhas."); document.getElementById('catImagemURL').value=''; document.getElementById('previewIvaTab').textContent=''; document.getElementById('previewIvaPreco').textContent='';}catch(err){alert('Erro ao guardar: ' + (err.code==='permission-denied' ? 'sem permissão — o email desta conta não coincide com as regras do Firestore.' : err.message));}} }
 
         // Catálogo pré-preenchido com preços médios de mercado em Portugal (2026), pesquisados para a zona de
         // Fafe/Guimarães/Felgueiras — todos os valores ficam gravados sem IVA (o sistema soma 23% automaticamente)
