@@ -3,10 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Pede aos browsers (e ao browser interno do Facebook/Instagram, que é conhecido por guardar páginas antigas em cache) para nunca guardar uma cópia desatualizada desta página. -->
+    <!-- Pede aos browsers para nunca guardar uma cópia desatualizada desta página (o script de rebentar cache abaixo é o que garante isto de verdade). -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+
+    <!-- Suporte a "Adicionar ao ecrã principal" — instala como app, com ícone e ecrã cheio próprios -->
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIkhpZ2lsaW1wIFNlcnZpY2VzIiwgInNob3J0X25hbWUiOiAiSGlnaWxpbXAiLCAiZGVzY3JpcHRpb24iOiAiTGltcGV6YSBwcm9maXNzaW9uYWwgZGUgc29mXHUwMGUxcywgY29sY2hcdTAwZjVlcyBlIGVzdG9mb3MuIE9yXHUwMGU3YW1lbnRvIGdyXHUwMGUxdGlzLiIsICJzdGFydF91cmwiOiAiLiIsICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLCAiYmFja2dyb3VuZF9jb2xvciI6ICIjMWUzYThhIiwgInRoZW1lX2NvbG9yIjogIiMxZTNhOGEiLCAiaWNvbnMiOiBbeyJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQXhNREFnTVRBd0lqNDhjbVZqZENCM2FXUjBhRDBpTVRBd0lpQm9aV2xuYUhROUlqRXdNQ0lnY25nOUlqSXdJaUJtYVd4c1BTSWpNV1V6WVRoaElpOCtQSFJsZUhRZ2VEMGlOVEFpSUhrOUlqWTRJaUJtYjI1MExYTnBlbVU5SWpZd0lpQm1iMjUwTFhkbGFXZG9kRDBpT1RBd0lpQjBaWGgwTFdGdVkyaHZjajBpYldsa1pHeGxJaUJtYVd4c1BTSjNhR2wwWlNJK1NEd3ZkR1Y0ZEQ0OEwzTjJaejQ9IiwgInNpemVzIjogIjE5MngxOTIiLCAidHlwZSI6ICJpbWFnZS9zdmcreG1sIn0sIHsic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1qQXdNQzl6ZG1jaUlIWnBaWGRDYjNnOUlqQWdNQ0F4TURBZ01UQXdJajQ4Y21WamRDQjNhV1IwYUQwaU1UQXdJaUJvWldsbmFIUTlJakV3TUNJZ2NuZzlJakl3SWlCbWFXeHNQU0lqTVdVellUaGhJaTgrUEhSbGVIUWdlRDBpTlRBaUlIazlJalk0SWlCbWIyNTBMWE5wZW1VOUlqWXdJaUJtYjI1MExYZGxhV2RvZEQwaU9UQXdJaUIwWlhoMExXRnVZMmh2Y2owaWJXbGtaR3hsSWlCbWFXeHNQU0ozYUdsMFpTSStTRHd2ZEdWNGRENDhMM04yWno0PSIsICJzaXplcyI6ICI1MTJ4NTEyIiwgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCJ9XX0=">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Higilimp">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjIwIiBmaWxsPSIjMWUzYThhIi8+PHRleHQgeD0iNTAiIHk9IjY4IiBmb250LXNpemU9IjYwIiBmb250LXdlaWdodD0iOTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSI+SDwvdGV4dD48L3N2Zz4=">
+
+    <!-- "Rebenta" qualquer cópia antiga guardada em cache (resolve o problema do browser interno do Facebook/Instagram
+         mostrar sempre a versão antiga): compara a versão atual do código com a última vista neste dispositivo, e
+         se forem diferentes, força uma atualização real, sem entrar em ciclo infinito. -->
+    <script>
+        const VERSAO_APP = 'v2026-08-23-1';
+        try {
+            if (sessionStorage.getItem('higilimp_versao') !== VERSAO_APP) {
+                sessionStorage.setItem('higilimp_versao', VERSAO_APP);
+                if (!location.href.includes('_r=')) {
+                    const sep = location.href.includes('?') ? '&' : '?';
+                    location.replace(location.href + sep + '_r=' + Date.now());
+                }
+            }
+        } catch(e) {}
+    </script>
+
     <title>Higilimp Services - Limpeza de Estofos e Colchões | Orçamento Grátis</title>
     <meta name="description" content="Limpeza profissional de sofás, colchões e estofos. Peça o seu orçamento grátis em 1 minuto.">
     <meta property="og:title" content="Higilimp Services - Orçamento Grátis">
@@ -84,6 +110,7 @@
                 <button onclick="abrirFunil()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-8 py-4 rounded-xl shadow-xl text-sm md:text-base"><i class="fa-solid fa-sparkles"></i> Pedir Orçamento Grátis</button>
                 <button onclick="document.getElementById('secaoTestemunhos')?.scrollIntoView({behavior:'smooth'})" id="resumoAvaliacoesHero" class="hidden mx-auto mt-4 flex items-center gap-2 bg-white/10 hover:bg-white/20 rounded-full px-4 py-2"><span id="resumoAvaliacoesEstrelas" class="text-amber-400 text-sm"></span> <span id="resumoAvaliacoesTexto" class="text-xs font-bold text-white"></span></button>
                 <div id="redesSociaisHero" class="flex justify-center gap-4 mt-4"></div>
+                <button id="btnInstalarApp" onclick="instalarApp()" class="hidden mx-auto mt-4 flex items-center gap-2 bg-white/10 hover:bg-white/20 rounded-full px-4 py-2 text-white text-xs font-bold"><i class="fa-solid fa-mobile-screen-button"></i> Instalar no ecrã principal</button>
             </div>
         </section>
 
@@ -935,6 +962,18 @@
             window.scrollTo(0,0);
         }
         window.addEventListener('popstate', (e) => { aplicarEstadoView((e.state && e.state.view) || 'home'); });
+
+        // Botão "Instalar no ecrã principal" — no Android/Chrome usa o prompt nativo; no iPhone, como a Apple não
+        // permite instalação automática, mostra instruções (Partilhar → Adicionar ao Ecrã Principal).
+        let promptInstalacaoApp = null;
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); promptInstalacaoApp = e; document.getElementById('btnInstalarApp')?.classList.remove('hidden'); });
+        const ehIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if(ehIOS && !window.navigator.standalone) document.getElementById('btnInstalarApp')?.classList.remove('hidden');
+        window.instalarApp = async () => {
+            if(promptInstalacaoApp) { promptInstalacaoApp.prompt(); await promptInstalacaoApp.userChoice; promptInstalacaoApp = null; document.getElementById('btnInstalarApp')?.classList.add('hidden'); }
+            else if(ehIOS) alert('No iPhone: toque no ícone de Partilhar (□ com seta a subir) na barra do Safari, e depois em "Adicionar ao Ecrã Principal".');
+            else alert('Para instalar: abra o menu do browser (⋮) e escolha "Adicionar ao ecrã principal" ou "Instalar app".');
+        }
 
         // Aviso visual claro sempre que a app fica sem internet, e some assim que a ligação volta.
         function atualizarAvisoOffline() { document.getElementById('avisoOffline')?.classList.toggle('hidden', navigator.onLine); }
