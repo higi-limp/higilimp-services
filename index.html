@@ -21,7 +21,7 @@
          mostrar sempre a versão antiga): compara a versão atual do código com a última vista neste dispositivo, e
          se forem diferentes, força uma atualização real, sem entrar em ciclo infinito. -->
     <script>
-        const VERSAO_APP = 'v2026-08-23-6';
+        const VERSAO_APP = 'v2026-08-23-7';
         try {
             if (sessionStorage.getItem('higilimp_versao') !== VERSAO_APP) {
                 sessionStorage.setItem('higilimp_versao', VERSAO_APP);
@@ -72,7 +72,6 @@
     <!-- NAVBAR -->
     <header class="bg-blue-900 shadow-lg sticky top-0 z-40">
         <div id="avisoOffline" class="hidden bg-amber-500 text-blue-950 text-center text-[11px] font-bold py-1.5"><i class="fa-solid fa-wifi"></i> Sem ligação — a mostrar os últimos dados guardados. As alterações vão sincronizar quando a internet voltar.</div>
-        <div id="avisoNavegadorInterno" class="hidden bg-amber-400 text-blue-950 text-center text-[11px] font-bold py-2 px-3"><i class="fa-solid fa-triangle-exclamation"></i> Está a ver isto dentro do Facebook/Instagram — pode não estar sempre atualizado. <button onclick="abrirNoNavegadorExterno()" class="underline font-black">Abrir no navegador ↗</button></div>
         <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3 cursor-pointer" onclick="abrirModalAdmin()">
                 <div id="headerLogoBox" class="w-10 h-10 bg-white rounded-lg flex items-center justify-center font-black text-xl text-blue-900 overflow-hidden">H</div>
@@ -84,6 +83,19 @@
             <i class="fa-regular fa-bell text-white text-lg"></i>
         </div>
     </header>
+
+    <!-- Aviso grande e centrado: aparece logo no topo quando detetado browser interno (Facebook/Instagram), impossível de ignorar -->
+    <div id="avisoNavegadorInterno" class="hidden bg-amber-50 border-b-4 border-amber-400 px-4 py-6">
+        <div class="max-w-md mx-auto text-center">
+            <div class="w-14 h-14 bg-amber-400 text-blue-950 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h2 class="font-black text-lg text-blue-950 mb-2">Está a ver uma versão desatualizada!</h2>
+            <p class="text-sm text-slate-700 mb-4">O Facebook/Instagram guarda cópias antigas desta página. Para ver as <strong>campanhas atuais</strong> e a <strong>versão mais recente</strong> da app, abra num navegador normal.</p>
+            <div class="flex flex-col gap-2">
+                <button onclick="abrirNoNavegadorExterno()" class="w-full bg-blue-900 text-white font-black py-3.5 rounded-xl shadow-lg"><i class="fa-solid fa-up-right-from-square"></i> Abrir no Navegador Agora</button>
+                <button onclick="instalarApp()" class="w-full bg-white border-2 border-blue-900 text-blue-900 font-black py-3 rounded-xl"><i class="fa-solid fa-download"></i> Instalar App no Ecrã Principal</button>
+            </div>
+        </div>
+    </div>
 
     <!-- PÁGINA DE VENDAS (HOME) -->
     <main id="viewHome" class="flex-grow w-full bg-slate-50">
