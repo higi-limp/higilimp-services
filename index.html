@@ -21,7 +21,7 @@
          mostrar sempre a versão antiga): compara a versão atual do código com a última vista neste dispositivo, e
          se forem diferentes, força uma atualização real, sem entrar em ciclo infinito. -->
     <script>
-        const VERSAO_APP = 'v2026-08-23-3';
+        const VERSAO_APP = 'v2026-08-23-4';
         try {
             if (sessionStorage.getItem('higilimp_versao') !== VERSAO_APP) {
                 sessionStorage.setItem('higilimp_versao', VERSAO_APP);
@@ -1073,7 +1073,9 @@
                 // Prova social REAL (nunca inventada): conta reservas de facto feitas nesta categoria nos últimos 7 dias.
                 const reservasReais = contarReservasRecentes(catNome);
                 const socialHtml = reservasReais > 0 ? `<p class="text-[11px] font-bold text-emerald-600 mt-1"><i class="fa-solid fa-users"></i> ${reservasReais} pessoa(s) reservaram esta semana</p>` : '';
-                return `<button onclick="abrirFunilItem('${d_safeAttr(catKey)}', ${idx})" class="bg-white rounded-xl p-4 text-left shadow-lg hover:scale-[1.02] transition"><p class="text-[10px] font-bold uppercase text-slate-400">${escHtml(catNome)}</p><p class="text-sm font-black mb-1">${escHtml(op.nome)}</p><div class="flex items-baseline gap-2">${temRiscado?`<span class="text-xs text-slate-400 line-through">${op.preco.toFixed(2)}€</span>`:''}<span class="text-xl font-black text-red-600">${op.tipoPreco==='orcamento'?'Sob consulta':precoMostrar.toFixed(2)+'€'}</span>${percent>0?`<span class="bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded">-${percent}%</span>`:''}</div>${contadorHtml}${vagasHtml}${socialHtml}</button>`;
+                // Para preços por m² ou por hora, deixa sempre claro que o valor é POR UNIDADE, nunca o total do serviço.
+                const unidadeTxt = op.tipoPreco === 'm2' ? '/m²' : (op.tipoPreco === 'hora' ? '/hora' : '');
+                return `<button onclick="abrirFunilItem('${d_safeAttr(catKey)}', ${idx})" class="bg-white rounded-xl p-4 text-left shadow-lg hover:scale-[1.02] transition"><p class="text-[10px] font-bold uppercase text-slate-400">${escHtml(catNome)}</p><p class="text-sm font-black mb-1">${escHtml(op.nome)}</p><div class="flex items-baseline gap-2">${temRiscado?`<span class="text-xs text-slate-400 line-through">${op.preco.toFixed(2)}€${unidadeTxt}</span>`:''}<span class="text-xl font-black text-red-600">${op.tipoPreco==='orcamento'?'Sob consulta':precoMostrar.toFixed(2)+'€'+unidadeTxt}</span>${percent>0?`<span class="bg-red-100 text-red-700 text-[10px] font-black px-1.5 py-0.5 rounded">-${percent}%</span>`:''}</div>${unidadeTxt?`<p class="text-[10px] text-slate-400">Preço por unidade de medida — o valor final depende da área/tempo real.</p>`:''}${contadorHtml}${vagasHtml}${socialHtml}</button>`;
             }).join('');
 
             // Cartão de destaque no topo (logo visível, à entrada) — resume TODAS as categorias em campanha,
